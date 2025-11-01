@@ -14,7 +14,7 @@ spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 # Nếu dùng mysql host thì dùng cái này
 #spring.datasource.url=jdbc:mysql://${MYSQL_HOST:mysql}:${MYSQL_PORT:3306}/${MYSQL_NAME:hikari-hotel}
 
-spring.datasource.url=jdbc:mysql://localhost:3306/hikari-hotel
+spring.datasource.url=jdbc:mysql://localhost:3306/hikari_hotel
 spring.datasource.username=${MYSQL_USERNAME:root}
 spring.datasource.password=${MYSQL_PASSWORD:root}
 

@@ -2,8 +2,7 @@ package org.web.hikarihotelmanagement.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.mail.MailSender;
-import org.springframework.mail.SimpleMailMessage;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.web.hikarihotelmanagement.dto.request.LoginRequest;
 import org.web.hikarihotelmanagement.dto.request.RegisterRequest;
 import org.web.hikarihotelmanagement.dto.request.ResendOtpRequest;

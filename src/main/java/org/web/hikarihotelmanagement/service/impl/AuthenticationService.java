@@ -36,10 +36,13 @@ public class AuthenticationService {
         }
 
         User user = new User();
-        user.setPassword(passwordEncoder.encode(request.password()));
-        user.setFullName(request.fullName());
         user.setEmail(request.email());
+        user.setPassword(passwordEncoder.encode(request.password()));
+        user.setName(request.name());
+        user.setPhone(request.phone());
+        user.setBirthDate(request.birthDate());
         user.setRole(Role.USER);
+        user.setStatus(false);
         user.setIsVerified(false);
 
         String otp = generateOtp();
@@ -70,7 +73,7 @@ public class AuthenticationService {
 
         String token = jwtService.generateToken(user);
 
-        return new AuthenticationResponse(token, user.getEmail(), user.getFullName());
+        return new AuthenticationResponse(token, user.getEmail(), user.getName());
     }
 
     private void sendOtpEmail(String email, String otp) {
@@ -110,6 +113,7 @@ public class AuthenticationService {
         }
 
         user.setIsVerified(true);
+        user.setStatus(true);
         user.setOtp(null);
         user.setOtpExpiry(null);
         userRepository.save(user);
