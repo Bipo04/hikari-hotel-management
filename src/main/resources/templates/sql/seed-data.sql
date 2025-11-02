@@ -15,7 +15,7 @@ TRUNCATE TABLE guests;
 TRUNCATE TABLE requests;
 TRUNCATE TABLE bookings;
 TRUNCATE TABLE room_availabilities;
-TRUNCATE TABLE room_amenities;
+TRUNCATE TABLE room_type_amenities;
 TRUNCATE TABLE rooms;
 TRUNCATE TABLE room_types;
 TRUNCATE TABLE amenities;
@@ -27,12 +27,12 @@ SET FOREIGN_KEY_CHECKS = 1;
 -- Password: password123
 -- ===============================================
 INSERT INTO users (email, password, name, phone, birth_date, role, status, is_verified, created_at, updated_at) VALUES
-('admin@hikari.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'Admin Hikari', '0901234567', '1990-01-01', 1, 1, 1, NOW(), NOW()),
-('user1@example.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'Nguyễn Văn A', '0912345678', '1995-05-15', 0, 1, 1, NOW(), NOW()),
-('user2@example.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'Trần Thị B', '0923456789', '1992-08-20', 0, 1, 1, NOW(), NOW()),
-('user3@example.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'Lê Văn C', '0934567890', '1998-03-10', 0, 1, 1, NOW(), NOW()),
-('user4@example.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'Phạm Thị D', '0945678901', '1994-11-25', 0, 1, 1, NOW(), NOW()),
-('user5@example.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'Hoàng Văn E', '0956789012', '1996-07-30', 0, 1, 1, NOW(), NOW());
+('admin@hikari.com', '$2a$10$wxKEMAva8GNE.iZwM3k9iOFJtSVjDos9nI/EtmDTk8qxePVFkKwPO', 'Admin Hikari', '0901234567', '1990-01-01', 1, 1, 1, NOW(), NOW()),
+('user1@example.com', '$2a$10$wxKEMAva8GNE.iZwM3k9iOFJtSVjDos9nI/EtmDTk8qxePVFkKwPO', 'Nguyễn Văn A', '0912345678', '1995-05-15', 0, 1, 1, NOW(), NOW()),
+('user2@example.com', '$2a$10$wxKEMAva8GNE.iZwM3k9iOFJtSVjDos9nI/EtmDTk8qxePVFkKwPO', 'Trần Thị B', '0923456789', '1992-08-20', 0, 1, 1, NOW(), NOW()),
+('user3@example.com', '$2a$10$wxKEMAva8GNE.iZwM3k9iOFJtSVjDos9nI/EtmDTk8qxePVFkKwPO', 'Lê Văn C', '0934567890', '1998-03-10', 0, 1, 1, NOW(), NOW()),
+('user4@example.com', '$2a$10$wxKEMAva8GNE.iZwM3k9iOFJtSVjDos9nI/EtmDTk8qxePVFkKwPO', 'Phạm Thị D', '0945678901', '1994-11-25', 0, 1, 1, NOW(), NOW()),
+('user5@example.com', '$2a$10$wxKEMAva8GNE.iZwM3k9iOFJtSVjDos9nI/EtmDTk8qxePVFkKwPO', 'Hoàng Văn E', '0956789012', '1996-07-30', 0, 1, 1, NOW(), NOW());
 
 -- ===============================================
 -- 2. AMENITIES (10 amenities)
@@ -50,101 +50,147 @@ INSERT INTO amenities (name, description, created_at, updated_at) VALUES
 ('Dép đi trong phòng', 'Dép cao su chống trượt', NOW(), NOW());
 
 -- ===============================================
--- 3. ROOM TYPES (4 loại phòng)
+-- 3. ROOM TYPES (6 loại phòng)
+-- class: 0=Standard, 1=Superior, 2=Business, 3=Suite
 -- ===============================================
-INSERT INTO room_types (name, description, price, created_at, updated_at) VALUES
-('Standard', 'Phòng tiêu chuẩn - 20m² - 1 giường đôi', 500000.00, NOW(), NOW()),
-('Superior', 'Phòng cao cấp - 30m² - 1 giường đôi + sofa', 800000.00, NOW(), NOW()),
-('Deluxe', 'Phòng deluxe - 40m² - 2 giường đôi + ban công', 1200000.00, NOW(), NOW()),
-('Suite', 'Phòng suite - 60m² - 1 giường king + phòng khách riêng', 2000000.00, NOW(), NOW());
-
--- ===============================================
--- 4. ROOMS (40 phòng: 10 Standard, 15 Superior, 10 Deluxe, 5 Suite)
--- ===============================================
-
--- 10 Standard (101-110)
-INSERT INTO rooms (room_number, room_type_id, capacity, description, created_at, updated_at) VALUES
-('101', 1, 2, 'Phòng Standard tầng 1, view sân vườn', NOW(), NOW()),
-('102', 1, 2, 'Phòng Standard tầng 1, view sân vườn', NOW(), NOW()),
-('103', 1, 2, 'Phòng Standard tầng 1, view sân vườn', NOW(), NOW()),
-('104', 1, 2, 'Phòng Standard tầng 1, view sân vườn', NOW(), NOW()),
-('105', 1, 2, 'Phòng Standard tầng 1, view sân vườn', NOW(), NOW()),
-('106', 1, 2, 'Phòng Standard tầng 1, view sân vườn', NOW(), NOW()),
-('107', 1, 2, 'Phòng Standard tầng 1, view sân vườn', NOW(), NOW()),
-('108', 1, 2, 'Phòng Standard tầng 1, view sân vườn', NOW(), NOW()),
-('109', 1, 2, 'Phòng Standard tầng 1, view sân vườn', NOW(), NOW()),
-('110', 1, 2, 'Phòng Standard tầng 1, view sân vườn', NOW(), NOW()),
-
--- 15 Superior (201-215)
-('201', 2, 2, 'Phòng Superior tầng 2, view thành phố', NOW(), NOW()),
-('202', 2, 2, 'Phòng Superior tầng 2, view thành phố', NOW(), NOW()),
-('203', 2, 2, 'Phòng Superior tầng 2, view thành phố', NOW(), NOW()),
-('204', 2, 2, 'Phòng Superior tầng 2, view thành phố', NOW(), NOW()),
-('205', 2, 2, 'Phòng Superior tầng 2, view thành phố', NOW(), NOW()),
-('206', 2, 2, 'Phòng Superior tầng 2, view thành phố', NOW(), NOW()),
-('207', 2, 2, 'Phòng Superior tầng 2, view thành phố', NOW(), NOW()),
-('208', 2, 2, 'Phòng Superior tầng 2, view thành phố', NOW(), NOW()),
-('209', 2, 2, 'Phòng Superior tầng 2, view thành phố', NOW(), NOW()),
-('210', 2, 2, 'Phòng Superior tầng 2, view thành phố', NOW(), NOW()),
-('211', 2, 2, 'Phòng Superior tầng 2, view thành phố', NOW(), NOW()),
-('212', 2, 2, 'Phòng Superior tầng 2, view thành phố', NOW(), NOW()),
-('213', 2, 2, 'Phòng Superior tầng 2, view thành phố', NOW(), NOW()),
-('214', 2, 2, 'Phòng Superior tầng 2, view thành phố', NOW(), NOW()),
-('215', 2, 2, 'Phòng Superior tầng 2, view thành phố', NOW(), NOW()),
-
--- 10 Deluxe (301-310)
-('301', 3, 4, 'Phòng Deluxe tầng 3, view biển, có ban công', NOW(), NOW()),
-('302', 3, 4, 'Phòng Deluxe tầng 3, view biển, có ban công', NOW(), NOW()),
-('303', 3, 4, 'Phòng Deluxe tầng 3, view biển, có ban công', NOW(), NOW()),
-('304', 3, 4, 'Phòng Deluxe tầng 3, view biển, có ban công', NOW(), NOW()),
-('305', 3, 4, 'Phòng Deluxe tầng 3, view biển, có ban công', NOW(), NOW()),
-('306', 3, 4, 'Phòng Deluxe tầng 3, view biển, có ban công', NOW(), NOW()),
-('307', 3, 4, 'Phòng Deluxe tầng 3, view biển, có ban công', NOW(), NOW()),
-('308', 3, 4, 'Phòng Deluxe tầng 3, view biển, có ban công', NOW(), NOW()),
-('309', 3, 4, 'Phòng Deluxe tầng 3, view biển, có ban công', NOW(), NOW()),
-('310', 3, 4, 'Phòng Deluxe tầng 3, view biển, có ban công', NOW(), NOW()),
-
--- 5 Suite (401-405)
-('401', 4, 4, 'Suite tầng 4, view biển toàn cảnh, phòng khách riêng', NOW(), NOW()),
-('402', 4, 4, 'Suite tầng 4, view biển toàn cảnh, phòng khách riêng', NOW(), NOW()),
-('403', 4, 4, 'Suite tầng 4, view biển toàn cảnh, phòng khách riêng', NOW(), NOW()),
-('404', 4, 4, 'Suite tầng 4, view biển toàn cảnh, phòng khách riêng', NOW(), NOW()),
-('405', 4, 4, 'Suite tầng 4, view biển toàn cảnh, phòng khách riêng', NOW(), NOW());
+INSERT INTO room_types (name, class, description, capacity, price, created_at, updated_at) VALUES
+('Phòng đơn Standard', 0, 'Phòng cơ bản cho 1 người', 1, 500.00, NOW(), NOW()),
+('Phòng đôi Standard', 0, 'Phòng cơ bản cho 2 người', 2, 800.00, NOW(), NOW()),
+('Phòng đơn Superior', 1, 'Phòng cao cấp 1 giường', 1, 700.00, NOW(), NOW()),
+('Phòng đôi Superior', 1, 'Phòng cao cấp 2 giường', 2, 1000.00, NOW(), NOW()),
+('Phòng đôi Business', 2, 'Dành cho khách công tác', 2, 1200.00, NOW(), NOW()),
+('Suite gia đình', 3, 'Phòng sang trọng, nhiều tiện nghi', 4, 2500.00, NOW(), NOW());
 
 -- ===============================================
--- 5. ROOM AMENITIES (Tiện nghi cho từng phòng)
+-- ===============================================
+-- 4. ROOMS (48 phòng: 8 phòng đơn Standard, 8 phòng đôi Standard, 8 phòng đơn Superior, 8 phòng đôi Superior, 8 phòng Business, 8 Suite)
 -- ===============================================
 
--- Standard rooms (101-110): WiFi, TV, Điều hòa, Tủ lạnh, Dép
-INSERT INTO room_amenities (room_id, amenity_id, created_at, updated_at)
-SELECT r.id, a.id, NOW(), NOW()
-FROM rooms r
-CROSS JOIN amenities a
-WHERE r.room_type_id = 1 
-  AND a.id IN (1, 2, 3, 4, 10);
+-- 8 Phòng đơn Standard (101-108) - room_type_id = 1
+INSERT INTO rooms (room_number, room_type_id, description, status, created_at, updated_at) VALUES
+('101', 1, 'Phòng đơn Standard tầng 1', 0, NOW(), NOW()),
+('102', 1, 'Phòng đơn Standard tầng 1', 0, NOW(), NOW()),
+('103', 1, 'Phòng đơn Standard tầng 1', 0, NOW(), NOW()),
+('104', 1, 'Phòng đơn Standard tầng 1', 0, NOW(), NOW()),
+('105', 1, 'Phòng đơn Standard tầng 1', 0, NOW(), NOW()),
+('106', 1, 'Phòng đơn Standard tầng 1', 0, NOW(), NOW()),
+('107', 1, 'Phòng đơn Standard tầng 1', 0, NOW(), NOW()),
+('108', 1, 'Phòng đơn Standard tầng 1', 0, NOW(), NOW()),
 
--- Superior rooms (201-215): WiFi, TV, Điều hòa, Tủ lạnh, Két sắt, Máy sấy tóc, Dép
-INSERT INTO room_amenities (room_id, amenity_id, created_at, updated_at)
-SELECT r.id, a.id, NOW(), NOW()
-FROM rooms r
-CROSS JOIN amenities a
-WHERE r.room_type_id = 2 
-  AND a.id IN (1, 2, 3, 4, 5, 8, 10);
+-- 8 Phòng đôi Standard (201-208) - room_type_id = 2
+('201', 2, 'Phòng đôi Standard tầng 2', 0, NOW(), NOW()),
+('202', 2, 'Phòng đôi Standard tầng 2', 0, NOW(), NOW()),
+('203', 2, 'Phòng đôi Standard tầng 2', 0, NOW(), NOW()),
+('204', 2, 'Phòng đôi Standard tầng 2', 0, NOW(), NOW()),
+('205', 2, 'Phòng đôi Standard tầng 2', 0, NOW(), NOW()),
+('206', 2, 'Phòng đôi Standard tầng 2', 0, NOW(), NOW()),
+('207', 2, 'Phòng đôi Standard tầng 2', 0, NOW(), NOW()),
+('208', 2, 'Phòng đôi Standard tầng 2', 0, NOW(), NOW()),
 
--- Deluxe rooms (301-310): WiFi, TV, Điều hòa, Tủ lạnh, Két sắt, Bồn tắm, Ban công, Máy sấy tóc, Dép
-INSERT INTO room_amenities (room_id, amenity_id, created_at, updated_at)
-SELECT r.id, a.id, NOW(), NOW()
-FROM rooms r
-CROSS JOIN amenities a
-WHERE r.room_type_id = 3 
-  AND a.id IN (1, 2, 3, 4, 5, 6, 7, 8, 10);
+-- 8 Phòng đơn Superior (301-308) - room_type_id = 3
+('301', 3, 'Phòng đơn Superior tầng 3', 0, NOW(), NOW()),
+('302', 3, 'Phòng đơn Superior tầng 3', 0, NOW(), NOW()),
+('303', 3, 'Phòng đơn Superior tầng 3', 0, NOW(), NOW()),
+('304', 3, 'Phòng đơn Superior tầng 3', 0, NOW(), NOW()),
+('305', 3, 'Phòng đơn Superior tầng 3', 0, NOW(), NOW()),
+('306', 3, 'Phòng đơn Superior tầng 3', 0, NOW(), NOW()),
+('307', 3, 'Phòng đơn Superior tầng 3', 0, NOW(), NOW()),
+('308', 3, 'Phòng đơn Superior tầng 3', 0, NOW(), NOW()),
 
--- Suite rooms (401-405): TẤT CẢ tiện nghi
-INSERT INTO room_amenities (room_id, amenity_id, created_at, updated_at)
-SELECT r.id, a.id, NOW(), NOW()
-FROM rooms r
-CROSS JOIN amenities a
-WHERE r.room_type_id = 4;
+-- 8 Phòng đôi Superior (401-408) - room_type_id = 4
+('401', 4, 'Phòng đôi Superior tầng 4', 0, NOW(), NOW()),
+('402', 4, 'Phòng đôi Superior tầng 4', 0, NOW(), NOW()),
+('403', 4, 'Phòng đôi Superior tầng 4', 0, NOW(), NOW()),
+('404', 4, 'Phòng đôi Superior tầng 4', 0, NOW(), NOW()),
+('405', 4, 'Phòng đôi Superior tầng 4', 0, NOW(), NOW()),
+('406', 4, 'Phòng đôi Superior tầng 4', 0, NOW(), NOW()),
+('407', 4, 'Phòng đôi Superior tầng 4', 0, NOW(), NOW()),
+('408', 4, 'Phòng đôi Superior tầng 4', 0, NOW(), NOW()),
+
+-- 8 Phòng Business (501-508) - room_type_id = 5
+('501', 5, 'Phòng Business tầng 5, dành cho khách công tác', 0, NOW(), NOW()),
+('502', 5, 'Phòng Business tầng 5, dành cho khách công tác', 0, NOW(), NOW()),
+('503', 5, 'Phòng Business tầng 5, dành cho khách công tác', 0, NOW(), NOW()),
+('504', 5, 'Phòng Business tầng 5, dành cho khách công tác', 0, NOW(), NOW()),
+('505', 5, 'Phòng Business tầng 5, dành cho khách công tác', 0, NOW(), NOW()),
+('506', 5, 'Phòng Business tầng 5, dành cho khách công tác', 0, NOW(), NOW()),
+('507', 5, 'Phòng Business tầng 5, dành cho khách công tác', 0, NOW(), NOW()),
+('508', 5, 'Phòng Business tầng 5, dành cho khách công tác', 0, NOW(), NOW()),
+
+-- 8 Suite gia đình (601-608) - room_type_id = 6
+('601', 6, 'Suite gia đình tầng 6, sang trọng và rộng rãi', 0, NOW(), NOW()),
+('602', 6, 'Suite gia đình tầng 6, sang trọng và rộng rãi', 0, NOW(), NOW()),
+('603', 6, 'Suite gia đình tầng 6, sang trọng và rộng rãi', 0, NOW(), NOW()),
+('604', 6, 'Suite gia đình tầng 6, sang trọng và rộng rãi', 0, NOW(), NOW()),
+('605', 6, 'Suite gia đình tầng 6, sang trọng và rộng rãi', 0, NOW(), NOW()),
+('606', 6, 'Suite gia đình tầng 6, sang trọng và rộng rãi', 0, NOW(), NOW()),
+('607', 6, 'Suite gia đình tầng 6, sang trọng và rộng rãi', 0, NOW(), NOW()),
+('608', 6, 'Suite gia đình tầng 6, sang trọng và rộng rãi', 0, NOW(), NOW());
+
+-- ===============================================
+-- 5. ROOM TYPE AMENITIES (Tiện nghi cho từng loại phòng)
+-- ===============================================
+
+-- Phòng đơn Standard (room_type_id=1): WiFi, TV, Điều hòa, Tủ lạnh, Dép
+INSERT INTO room_type_amenities (room_type_id, amenity_id, created_at, updated_at) VALUES
+(1, 1, NOW(), NOW()),
+(1, 2, NOW(), NOW()),
+(1, 3, NOW(), NOW()),
+(1, 4, NOW(), NOW()),
+(1, 10, NOW(), NOW());
+
+-- Phòng đôi Standard (room_type_id=2): WiFi, TV, Điều hòa, Tủ lạnh, Dép
+INSERT INTO room_type_amenities (room_type_id, amenity_id, created_at, updated_at) VALUES
+(2, 1, NOW(), NOW()),
+(2, 2, NOW(), NOW()),
+(2, 3, NOW(), NOW()),
+(2, 4, NOW(), NOW()),
+(2, 10, NOW(), NOW());
+
+-- Phòng đơn Superior (room_type_id=3): WiFi, TV, Điều hòa, Tủ lạnh, Két sắt, Máy sấy tóc, Dép
+INSERT INTO room_type_amenities (room_type_id, amenity_id, created_at, updated_at) VALUES
+(3, 1, NOW(), NOW()),
+(3, 2, NOW(), NOW()),
+(3, 3, NOW(), NOW()),
+(3, 4, NOW(), NOW()),
+(3, 5, NOW(), NOW()),
+(3, 8, NOW(), NOW()),
+(3, 10, NOW(), NOW());
+
+-- Phòng đôi Superior (room_type_id=4): WiFi, TV, Điều hòa, Tủ lạnh, Két sắt, Máy sấy tóc, Dép
+INSERT INTO room_type_amenities (room_type_id, amenity_id, created_at, updated_at) VALUES
+(4, 1, NOW(), NOW()),
+(4, 2, NOW(), NOW()),
+(4, 3, NOW(), NOW()),
+(4, 4, NOW(), NOW()),
+(4, 5, NOW(), NOW()),
+(4, 8, NOW(), NOW()),
+(4, 10, NOW(), NOW());
+
+-- Phòng Business (room_type_id=5): WiFi, TV, Điều hòa, Tủ lạnh, Két sắt, Bồn tắm, Máy sấy tóc, Máy pha cà phê, Dép
+INSERT INTO room_type_amenities (room_type_id, amenity_id, created_at, updated_at) VALUES
+(5, 1, NOW(), NOW()),
+(5, 2, NOW(), NOW()),
+(5, 3, NOW(), NOW()),
+(5, 4, NOW(), NOW()),
+(5, 5, NOW(), NOW()),
+(5, 6, NOW(), NOW()),
+(5, 8, NOW(), NOW()),
+(5, 9, NOW(), NOW()),
+(5, 10, NOW(), NOW());
+
+-- Suite gia đình (room_type_id=6): TẤT CẢ tiện nghi
+INSERT INTO room_type_amenities (room_type_id, amenity_id, created_at, updated_at) VALUES
+(6, 1, NOW(), NOW()),
+(6, 2, NOW(), NOW()),
+(6, 3, NOW(), NOW()),
+(6, 4, NOW(), NOW()),
+(6, 5, NOW(), NOW()),
+(6, 6, NOW(), NOW()),
+(6, 7, NOW(), NOW()),
+(6, 8, NOW(), NOW()),
+(6, 9, NOW(), NOW()),
+(6, 10, NOW(), NOW());
 
 -- ===============================================
 -- 6. ROOM AVAILABILITIES (60 ngày tới cho tất cả phòng)
@@ -184,64 +230,64 @@ WHERE r.room_type_id = rt.id;
 -- 7. BOOKINGS (20 bookings với các trạng thái khác nhau)
 -- ===============================================
 
-INSERT INTO bookings (user_id, booking_code, booking_date, status, created_at, updated_at) VALUES
+INSERT INTO bookings (user_id, booking_code, status, payment_method, transaction_id, amount, decline_reason, created_at, updated_at) VALUES
 -- 5 bookings COMPLETED (đã hoàn thành)
-(2, 'BK0001', DATE_SUB(NOW(), INTERVAL 60 DAY), 5, DATE_SUB(NOW(), INTERVAL 60 DAY), DATE_SUB(NOW(), INTERVAL 55 DAY)),
-(3, 'BK0002', DATE_SUB(NOW(), INTERVAL 50 DAY), 5, DATE_SUB(NOW(), INTERVAL 50 DAY), DATE_SUB(NOW(), INTERVAL 45 DAY)),
-(4, 'BK0003', DATE_SUB(NOW(), INTERVAL 40 DAY), 5, DATE_SUB(NOW(), INTERVAL 40 DAY), DATE_SUB(NOW(), INTERVAL 35 DAY)),
-(5, 'BK0004', DATE_SUB(NOW(), INTERVAL 30 DAY), 5, DATE_SUB(NOW(), INTERVAL 30 DAY), DATE_SUB(NOW(), INTERVAL 25 DAY)),
-(6, 'BK0005', DATE_SUB(NOW(), INTERVAL 20 DAY), 5, DATE_SUB(NOW(), INTERVAL 20 DAY), DATE_SUB(NOW(), INTERVAL 15 DAY)),
+(2, 'BK0001', 5, 'VNPAY', 'VNP20241001123456', 1500000.00, NULL, DATE_SUB(NOW(), INTERVAL 60 DAY), DATE_SUB(NOW(), INTERVAL 55 DAY)),
+(3, 'BK0002', 5, 'MOMO', 'MM20241002234567', 2400000.00, NULL, DATE_SUB(NOW(), INTERVAL 50 DAY), DATE_SUB(NOW(), INTERVAL 45 DAY)),
+(4, 'BK0003', 5, 'VNPAY', 'VNP20241003345678', 3600000.00, NULL, DATE_SUB(NOW(), INTERVAL 40 DAY), DATE_SUB(NOW(), INTERVAL 35 DAY)),
+(5, 'BK0004', 5, 'BANKING', 'BANK20241004456789', 6000000.00, NULL, DATE_SUB(NOW(), INTERVAL 30 DAY), DATE_SUB(NOW(), INTERVAL 25 DAY)),
+(6, 'BK0005', 5, 'VNPAY', 'VNP20241005567890', 1500000.00, NULL, DATE_SUB(NOW(), INTERVAL 20 DAY), DATE_SUB(NOW(), INTERVAL 15 DAY)),
 
 -- 3 bookings PAYMENT_COMPLETED (đã thanh toán, sắp checkin)
-(2, 'BK0006', DATE_SUB(NOW(), INTERVAL 3 DAY), 3, DATE_SUB(NOW(), INTERVAL 3 DAY), DATE_SUB(NOW(), INTERVAL 2 DAY)),
-(3, 'BK0007', DATE_SUB(NOW(), INTERVAL 5 DAY), 3, DATE_SUB(NOW(), INTERVAL 5 DAY), DATE_SUB(NOW(), INTERVAL 4 DAY)),
-(4, 'BK0008', DATE_SUB(NOW(), INTERVAL 7 DAY), 3, DATE_SUB(NOW(), INTERVAL 7 DAY), DATE_SUB(NOW(), INTERVAL 6 DAY)),
+(2, 'BK0006', 3, 'VNPAY', 'VNP20241106001122', 2400000.00, NULL, DATE_SUB(NOW(), INTERVAL 3 DAY), DATE_SUB(NOW(), INTERVAL 2 DAY)),
+(3, 'BK0007', 3, 'MOMO', 'MM20241106002233', 3600000.00, NULL, DATE_SUB(NOW(), INTERVAL 5 DAY), DATE_SUB(NOW(), INTERVAL 4 DAY)),
+(4, 'BK0008', 3, 'BANKING', 'BANK20241106003344', 1500000.00, NULL, DATE_SUB(NOW(), INTERVAL 7 DAY), DATE_SUB(NOW(), INTERVAL 6 DAY)),
 
 -- 3 bookings PAYMENT_PENDING (chờ thanh toán)
-(5, 'BK0009', DATE_SUB(NOW(), INTERVAL 2 DAY), 2, DATE_SUB(NOW(), INTERVAL 2 DAY), DATE_SUB(NOW(), INTERVAL 2 DAY)),
-(6, 'BK0010', DATE_SUB(NOW(), INTERVAL 1 DAY), 2, DATE_SUB(NOW(), INTERVAL 1 DAY), DATE_SUB(NOW(), INTERVAL 1 DAY)),
-(2, 'BK0011', NOW(), 2, NOW(), NOW()),
+(5, 'BK0009', 2, NULL, NULL, 2400000.00, NULL, DATE_SUB(NOW(), INTERVAL 2 DAY), DATE_SUB(NOW(), INTERVAL 2 DAY)),
+(6, 'BK0010', 2, NULL, NULL, 1500000.00, NULL, DATE_SUB(NOW(), INTERVAL 1 DAY), DATE_SUB(NOW(), INTERVAL 1 DAY)),
+(2, 'BK0011', 2, NULL, NULL, 3600000.00, NULL, NOW(), NOW()),
 
 -- 4 bookings CONFIRMED (đã xác nhận, chờ thanh toán)
-(3, 'BK0012', NOW(), 1, NOW(), NOW()),
-(4, 'BK0013', NOW(), 1, NOW(), NOW()),
-(5, 'BK0014', NOW(), 1, NOW(), NOW()),
-(6, 'BK0015', NOW(), 1, NOW(), NOW()),
+(3, 'BK0012', 1, NULL, NULL, 6000000.00, NULL, NOW(), NOW()),
+(4, 'BK0013', 1, NULL, NULL, 2400000.00, NULL, NOW(), NOW()),
+(5, 'BK0014', 1, NULL, NULL, 1500000.00, NULL, NOW(), NOW()),
+(6, 'BK0015', 1, NULL, NULL, 3600000.00, NULL, NOW(), NOW()),
 
 -- 3 bookings PENDING (chờ xác nhận)
-(2, 'BK0016', NOW(), 0, NOW(), NOW()),
-(3, 'BK0017', NOW(), 0, NOW(), NOW()),
-(4, 'BK0018', NOW(), 0, NOW(), NOW()),
+(2, 'BK0016', 0, NULL, NULL, 1500000.00, NULL, NOW(), NOW()),
+(3, 'BK0017', 0, NULL, NULL, 2400000.00, NULL, NOW(), NOW()),
+(4, 'BK0018', 0, NULL, NULL, 3600000.00, NULL, NOW(), NOW()),
 
 -- 2 bookings CANCELLED/DECLINED
-(5, 'BK0019', DATE_SUB(NOW(), INTERVAL 10 DAY), 4, DATE_SUB(NOW(), INTERVAL 10 DAY), DATE_SUB(NOW(), INTERVAL 9 DAY)),
-(6, 'BK0020', DATE_SUB(NOW(), INTERVAL 8 DAY), 5, DATE_SUB(NOW(), INTERVAL 8 DAY), DATE_SUB(NOW(), INTERVAL 7 DAY));
+(5, 'BK0019', 4, NULL, NULL, 1500000.00, NULL, DATE_SUB(NOW(), INTERVAL 10 DAY), DATE_SUB(NOW(), INTERVAL 9 DAY)),
+(6, 'BK0020', 5, NULL, NULL, 2400000.00, 'Phòng không khả dụng trong thời gian yêu cầu', DATE_SUB(NOW(), INTERVAL 8 DAY), DATE_SUB(NOW(), INTERVAL 7 DAY));
 
 -- ===============================================
 -- 8. REQUESTS (1 request cho mỗi booking)
 -- ===============================================
 
-INSERT INTO requests (booking_id, room_id, check_in, check_out, number_of_guests, status, created_at, updated_at)
+INSERT INTO requests (booking_id, room_id, check_in, check_out, number_of_guests, status, note, created_at, updated_at)
 SELECT 
     b.id,
     -- Chọn phòng dựa vào booking_id
     CASE 
         WHEN b.id BETWEEN 1 AND 5 THEN b.id  -- COMPLETED: rooms 1-5
-        WHEN b.id BETWEEN 6 AND 8 THEN b.id + 5  -- PAYMENT_COMPLETED: rooms 6-8
-        WHEN b.id BETWEEN 9 AND 11 THEN b.id + 5  -- PAYMENT_PENDING: rooms 9-11
-        WHEN b.id BETWEEN 12 AND 15 THEN b.id + 5  -- CONFIRMED: rooms 12-15
-        WHEN b.id BETWEEN 16 AND 18 THEN b.id + 5  -- PENDING: rooms 16-18
-        ELSE b.id + 5  -- CANCELLED/DECLINED: rooms 19-20
+        WHEN b.id BETWEEN 6 AND 8 THEN b.id + 5  -- PAYMENT_COMPLETED: rooms 11-13
+        WHEN b.id BETWEEN 9 AND 11 THEN b.id + 5  -- PAYMENT_PENDING: rooms 14-16
+        WHEN b.id BETWEEN 12 AND 15 THEN b.id + 5  -- CONFIRMED: rooms 17-20
+        WHEN b.id BETWEEN 16 AND 18 THEN b.id + 5  -- PENDING: rooms 21-23
+        ELSE b.id + 5  -- CANCELLED/DECLINED: rooms 24-25
     END,
     -- Check-in date
     CASE 
-        WHEN b.status = 5 THEN DATE_ADD(b.booking_date, INTERVAL 5 DAY)  -- COMPLETED: đã checkin/checkout
+        WHEN b.status IN (4, 5) THEN DATE_ADD(b.created_at, INTERVAL 5 DAY)  -- COMPLETED/CANCELLED: đã qua
         ELSE DATE_ADD(NOW(), INTERVAL 7 DAY)  -- Tương lai: 7 ngày sau
     END,
     -- Check-out date
     CASE 
-        WHEN b.status = 5 THEN DATE_ADD(b.booking_date, INTERVAL 8 DAY)  -- COMPLETED: 3 ngày lưu trú
-        ELSE DATE_ADD(NOW(), INTERVAL 10 DAY)  -- Tương lai: 3 ngày lưu trú
+        WHEN b.status IN (4, 5) THEN DATE_ADD(b.created_at, INTERVAL 8 DAY)  -- 3 ngày lưu trú
+        ELSE DATE_ADD(NOW(), INTERVAL 10 DAY)  -- 3 ngày lưu trú
     END,
     2,  -- number_of_guests
     -- Status của request tương ứng với booking
@@ -252,6 +298,15 @@ SELECT
         WHEN 3 THEN 3  -- PAYMENT_COMPLETED
         WHEN 4 THEN 6  -- CANCELLED
         WHEN 5 THEN 7  -- COMPLETED
+    END,
+    CASE 
+        WHEN b.status = 0 THEN 'Vui lòng xác nhận đặt phòng'
+        WHEN b.status = 1 THEN 'Đã xác nhận, chờ thanh toán'
+        WHEN b.status = 2 THEN 'Đang chờ thanh toán'
+        WHEN b.status = 3 THEN 'Đã thanh toán, chờ check-in'
+        WHEN b.status = 4 THEN 'Booking đã bị hủy'
+        WHEN b.status = 5 THEN 'Đã hoàn thành'
+        ELSE NULL
     END,
     b.created_at,
     b.updated_at
@@ -330,7 +385,7 @@ SELECT COUNT(*) AS total_users FROM users;
 SELECT COUNT(*) AS total_amenities FROM amenities;
 SELECT COUNT(*) AS total_room_types FROM room_types;
 SELECT COUNT(*) AS total_rooms FROM rooms;
-SELECT COUNT(*) AS total_room_amenities FROM room_amenities;
+SELECT COUNT(*) AS total_room_type_amenities FROM room_type_amenities;
 SELECT COUNT(*) AS total_room_availabilities FROM room_availabilities;
 SELECT COUNT(*) AS total_bookings FROM bookings;
 SELECT COUNT(*) AS total_requests FROM requests;

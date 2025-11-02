@@ -15,16 +15,16 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "room_amenities")
-public class RoomAmenity {
+@Table(name = "room_type_amenities")
+public class RoomTypeAmenity {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "room_id", nullable = false)
-    private Room room;
+    @JoinColumn(name = "room_type_id", nullable = false)
+    private RoomType roomType;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "amenity_id", nullable = false)

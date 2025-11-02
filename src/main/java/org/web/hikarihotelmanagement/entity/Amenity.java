@@ -39,5 +39,5 @@ public class Amenity {
 
     // Relationships
     @OneToMany(mappedBy = "amenity", cascade = CascadeType.ALL)
-    private List<RoomAmenity> roomAmenities = new ArrayList<>();
+    private List<RoomTypeAmenity> roomTypeAmenities = new ArrayList<>();
 }

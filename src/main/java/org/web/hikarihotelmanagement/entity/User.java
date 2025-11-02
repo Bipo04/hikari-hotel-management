@@ -35,7 +35,8 @@ public class User implements UserDetails {
     @Column(name = "birth_date")
     private Date birthDate;
 
-    private Boolean status;
+    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")
+    private Boolean status = true;
 
     @Enumerated(EnumType.ORDINAL)
     private Role role;

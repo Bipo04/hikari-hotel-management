@@ -9,6 +9,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.web.hikarihotelmanagement.enums.BookingStatus;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,16 +33,18 @@ public class Booking {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(name = "booking_date")
-    private LocalDateTime bookingDate;
-
     @Enumerated(EnumType.ORDINAL)
     @Column(name = "status")
     private BookingStatus status;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "status_changed_by_id")
-    private User statusChangedBy;
+    @Column(name = "payment_method", length = 50)
+    private String paymentMethod;
+
+    @Column(name = "transaction_id", length = 100)
+    private String transactionId;
+
+    @Column(precision = 10, scale = 2)
+    private BigDecimal amount;
 
     @Column(name = "decline_reason")
     private String declineReason;

@@ -1,8 +1,9 @@
 package org.web.hikarihotelmanagement.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.*;
 import org.web.hikarihotelmanagement.dto.request.LoginRequest;
 import org.web.hikarihotelmanagement.dto.request.RegisterRequest;
 import org.web.hikarihotelmanagement.dto.request.ResendOtpRequest;
@@ -10,14 +11,13 @@ import org.web.hikarihotelmanagement.dto.request.VerifyOtpRequest;
 import org.web.hikarihotelmanagement.dto.response.AuthenticationResponse;
 import org.web.hikarihotelmanagement.service.impl.AuthenticationService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
 @RestController
+@RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@Tag(name = "Authentication", description = "API quản lý xác thực và đăng nhập người dùng")
 public class AuthenticationController {
 
     private final AuthenticationService authenticationService;

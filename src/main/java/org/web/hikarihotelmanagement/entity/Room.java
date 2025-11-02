@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.web.hikarihotelmanagement.enums.RoomStatus;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -34,7 +35,8 @@ public class Room {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    private Integer capacity;
+    @Enumerated(EnumType.ORDINAL)
+    private RoomStatus status;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -45,9 +47,6 @@ public class Room {
     private LocalDateTime updatedAt;
 
     // Relationships
-    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL)
-    private List<RoomAmenity> roomAmenities = new ArrayList<>();
-
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL)
     private List<RoomAvailability> roomAvailabilities = new ArrayList<>();
 

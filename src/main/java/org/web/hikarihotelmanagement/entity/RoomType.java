@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.web.hikarihotelmanagement.enums.RoomClass;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -28,8 +29,14 @@ public class RoomType {
     @Column(unique = true)
     private String name;
 
+    @Enumerated(EnumType.ORDINAL)
+    @Column(name = "class")
+    private RoomClass roomClass;
+
     @Column(columnDefinition = "TEXT")
     private String description;
+
+    private Integer capacity;
 
     @Column(precision = 10, scale = 2)
     private BigDecimal price;
@@ -45,4 +52,7 @@ public class RoomType {
     // Relationships
     @OneToMany(mappedBy = "roomType", cascade = CascadeType.ALL)
     private List<Room> rooms = new ArrayList<>();
+
+    @OneToMany(mappedBy = "roomType", cascade = CascadeType.ALL)
+    private List<RoomTypeAmenity> roomTypeAmenities = new ArrayList<>();
 }
