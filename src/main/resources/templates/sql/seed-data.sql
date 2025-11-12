@@ -1,11 +1,10 @@
 -- ===============================================
 -- HIKARI HOTEL MANAGEMENT - SEED DATA
--- Database: hikari_hotel
+-- Database: HikariHotel
 -- ===============================================
 
 -- Tạo database nếu chưa có
-CREATE DATABASE IF NOT EXISTS hikari_hotel CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE hikari_hotel;
+USE HikariHotel;
 
 -- Xóa dữ liệu cũ (theo thứ tự foreign key)
 SET FOREIGN_KEY_CHECKS = 0;
