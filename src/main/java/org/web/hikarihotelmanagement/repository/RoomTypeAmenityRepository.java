@@ -1,9 +1,11 @@
 package org.web.hikarihotelmanagement.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 import org.web.hikarihotelmanagement.entity.RoomTypeAmenity;
 
-@Repository
+import java.util.List;
+
 public interface RoomTypeAmenityRepository extends JpaRepository<RoomTypeAmenity, Long> {
+    List<RoomTypeAmenity> findByRoomTypeId(Long roomTypeId);
+    void deleteByRoomTypeId(Long roomTypeId);
 }

@@ -1,16 +1,14 @@
 package org.web.hikarihotelmanagement.dto.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+import java.time.LocalDateTime;
+
+@Data
 public class AmenityResponse {
     private Long id;
     private String name;
     private String description;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }
