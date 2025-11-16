@@ -1,27 +1,17 @@
 package org.web.hikarihotelmanagement.service;
 
-import org.web.hikarihotelmanagement.entity.RoomType;
+import org.web.hikarihotelmanagement.dto.request.RoomTypeRequest;
+import org.web.hikarihotelmanagement.dto.response.RoomTypeResponse;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface RoomTypeService {
+    RoomTypeResponse create(RoomTypeRequest req);
+    RoomTypeResponse update(Long id, RoomTypeRequest req);
+    RoomTypeResponse getById(Long id);
+    List<RoomTypeResponse> getAll();
 
-    // Tạo mới một loại phòng
-    RoomType createRoomType(RoomType roomType);
+    RoomTypeResponse removeAmenity(Long roomTypeId, Long amenityId);
+    RoomTypeResponse addAmenities(Long roomTypeId, List<Long> amenityIds);
 
-    // Lấy danh sách tất cả loại phòng
-    List<RoomType> getAllRoomTypes();
-
-    // Lấy chi tiết một loại phòng theo ID
-    Optional<RoomType> getRoomTypeById(Long id);
-
-    // Cập nhật thông tin loại phòng
-    RoomType updateRoomType(Long id, RoomType roomTypeDetails);
-
-    // Xóa loại phòng theo ID
-    void deleteRoomType(Long id);
-
-    //Tìm theo tên loại phòng
-    Optional<RoomType> getRoomTypeByName(String name);
 }

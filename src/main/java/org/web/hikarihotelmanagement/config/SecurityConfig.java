@@ -1,6 +1,7 @@
 package org.web.hikarihotelmanagement.config;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpMethod;
 import org.web.hikarihotelmanagement.filter.JwtAuthenticationFilter;
 import org.web.hikarihotelmanagement.service.impl.UserDetailsServiceImpl;
 import org.springframework.context.annotation.Bean;
@@ -35,17 +36,27 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(req -> req
-                        // Public endpoints
                         .requestMatchers(
-
                                 "/api/auth/**",
-                                "/swagger-ui/**", "/v3/api-docs/**", "/ws/**",
-                                "/api/setup/**")
-                        .permitAll()
-                        .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
-                        .requestMatchers("/api/user/**").hasAnyAuthority("USER", "ADMIN")
+                                "/swagger-ui/**", "/v3/api-docs/**",
+                                "/api/setup/**"
+                        ).permitAll()
+
+                        .requestMatchers(HttpMethod.GET, "/api/room-types/**").permitAll()
+
+                        .requestMatchers(HttpMethod.POST, "/api/room-types/**").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/room-types/**").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/room-types/**").hasAuthority("ADMIN")
+
+                        .requestMatchers(HttpMethod.GET, "/api/amenities/**").permitAll()
+
+                        .requestMatchers(HttpMethod.POST, "/api/amenities/**").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/amenities/**").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/amenities/**").hasAuthority("ADMIN")
+
                         .anyRequest().authenticated()
                 )
+
                 .userDetailsService(userDetailsServiceImpl)
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)

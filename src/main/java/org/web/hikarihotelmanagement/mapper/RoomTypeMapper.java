@@ -1,45 +1,39 @@
 package org.web.hikarihotelmanagement.mapper;
 
-import org.web.hikarihotelmanagement.dto.request.RoomTypeRequest;
 import org.web.hikarihotelmanagement.dto.response.RoomTypeResponse;
 import org.web.hikarihotelmanagement.entity.RoomType;
-import org.web.hikarihotelmanagement.enums.RoomClass;
+import org.web.hikarihotelmanagement.entity.RoomTypeAmenity;
 
-public interface RoomTypeMapper {
+import java.util.stream.Collectors;
 
-    public static RoomType toEntity(RoomTypeRequest request) {
-        RoomType roomType = new RoomType();
-        roomType.setName(request.getName());
-        roomType.setDescription(request.getDescription());
-        roomType.setCapacity(request.getCapacity());
-        roomType.setPrice(request.getPrice());
-
-        if (request.getRoomClass() != null && !request.getRoomClass().isEmpty()) {
-            try {
-                roomType.setRoomClass(RoomClass.valueOf(request.getRoomClass().toUpperCase()));
-            } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException("Giá trị roomClass không hợp lệ: " + request.getRoomClass());
-            }
-        }
-
-        return roomType;
-    }
+public class RoomTypeMapper {
 
     public static RoomTypeResponse toResponse(RoomType entity) {
-        RoomTypeResponse response = new RoomTypeResponse();
-        response.setId(entity.getId());
-        response.setName(entity.getName());
-        response.setDescription(entity.getDescription());
-        response.setCapacity(entity.getCapacity());
-        response.setPrice(entity.getPrice());
+        RoomTypeResponse dto = new RoomTypeResponse();
+        dto.setId(entity.getId());
+        dto.setName(entity.getName());
+        dto.setRoomClass(entity.getRoomClass() != null ? entity.getRoomClass().name() : null);
+        dto.setDescription(entity.getDescription());
+        dto.setCapacity(entity.getCapacity());
+        dto.setPrice(entity.getPrice());
+        dto.setCreatedAt(entity.getCreatedAt());
+        dto.setUpdatedAt(entity.getUpdatedAt());
 
-        if (entity.getRoomClass() != null) {
-            response.setRoomClass(entity.getRoomClass().name());
+        if (entity.getRoomTypeAmenities() != null) {
+            dto.setAmenities(
+                    entity.getRoomTypeAmenities().stream()
+                            .map(RoomTypeAmenity::getAmenity)
+                            .map(a -> {
+                                RoomTypeResponse.AmenityResponse ar = new RoomTypeResponse.AmenityResponse();
+                                ar.setId(a.getId());
+                                ar.setName(a.getName());
+                                ar.setDescription(a.getDescription());
+                                return ar;
+                            })
+                            .collect(Collectors.toList())
+            );
         }
 
-        response.setCreatedAt(entity.getCreatedAt());
-        response.setUpdatedAt(entity.getUpdatedAt());
-
-        return response;
+        return dto;
     }
 }
