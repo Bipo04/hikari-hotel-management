@@ -13,11 +13,8 @@ import java.util.List;
 
 @Repository
 public interface RoomTypeRepository extends JpaRepository<RoomType, Long> {
-<<<<<<< HEAD
     Optional<RoomType> findByName(String name);
 
-=======
-    
     /**
      * Tìm các loại phòng có phòng trống trong khoảng thời gian
      * Dựa vào bảng room_availabilities
@@ -30,5 +27,4 @@ public interface RoomTypeRepository extends JpaRepository<RoomType, Long> {
            "AND ra.isAvailable = true")
     List<RoomType> findAvailableRoomTypes(@Param("checkInDate") LocalDate checkInDate, 
                                           @Param("checkOutDate") LocalDate checkOutDate);
->>>>>>> 95301be (dat phong)
 }
