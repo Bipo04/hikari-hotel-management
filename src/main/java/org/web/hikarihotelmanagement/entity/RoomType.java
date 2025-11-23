@@ -55,4 +55,7 @@ public class RoomType {
 
     @OneToMany(mappedBy = "roomType", cascade = CascadeType.ALL)
     private List<RoomTypeAmenity> roomTypeAmenities = new ArrayList<>();
+
+    @OneToMany(mappedBy = "roomType", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RoomTypeImage> images = new ArrayList<>();
 }
