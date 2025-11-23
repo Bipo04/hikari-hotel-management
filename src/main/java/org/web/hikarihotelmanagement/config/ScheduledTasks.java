@@ -44,13 +44,13 @@ public class ScheduledTasks {
         List<Booking> expiredBookings = bookingRepository.findExpiredPendingBookings(expirationTime);
         
         if (!expiredBookings.isEmpty()) {
-            log.info("Found {} expired bookings to cancel", expiredBookings.size());
+            log.info("Tìm thấy {} đơn dặt đã quá hạn chưa thanh toán", expiredBookings.size());
             
             for (Booking booking : expiredBookings) {
                 booking.setStatus(BookingStatus.CANCELLED);
                 unlockRooms(booking);
                 bookingRepository.save(booking);
-                log.info("Cancelled expired booking: {}", booking.getBookingCode());
+                log.info("Số đơn quá hạn đã hủy: {}", booking.getBookingCode());
             }
         }
     }

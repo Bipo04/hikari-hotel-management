@@ -21,7 +21,6 @@ import java.util.List;
 @RequestMapping("/api/public/room-types")
 @RequiredArgsConstructor
 @Tag(name = "Public Room Type", description = "API public hiển thị loại phòng")
-@CrossOrigin(origins = "*")
 public class PublicRoomTypeController {
 
     private final RoomTypeService roomTypeService;

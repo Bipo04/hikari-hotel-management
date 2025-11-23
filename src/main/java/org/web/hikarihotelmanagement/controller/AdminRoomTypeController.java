@@ -1,5 +1,6 @@
 package org.web.hikarihotelmanagement.controller;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -15,7 +16,7 @@ import org.web.hikarihotelmanagement.service.RoomTypeService;
 @RequestMapping("/api/admin/room-types")
 @RequiredArgsConstructor
 @Tag(name = "Admin Room Type", description = "API admin quản lý loại phòng")
-@CrossOrigin(origins = "*")
+@SecurityRequirement(name = "bearerAuth")
 public class AdminRoomTypeController {
 
     private final RoomTypeService roomTypeService;
