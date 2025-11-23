@@ -40,9 +40,6 @@ public class Booking {
     @Column(name = "payment_method", length = 50)
     private String paymentMethod;
 
-    @Column(name = "transaction_id", length = 100)
-    private String transactionId;
-
     @Column(precision = 10, scale = 2)
     private BigDecimal amount;
 
