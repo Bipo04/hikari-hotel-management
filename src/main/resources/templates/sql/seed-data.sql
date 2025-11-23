@@ -4,7 +4,7 @@
 -- ===============================================
 
 -- Tạo database nếu chưa có
-USE HikariHotel;
+USE `hikari-hotel`;
 
 -- Xóa dữ liệu cũ (theo thứ tự foreign key)
 SET FOREIGN_KEY_CHECKS = 0;
