@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.web.hikarihotelmanagement.dto.request.CreateBookingRequest;
 import org.web.hikarihotelmanagement.dto.request.RoomBookingRequest;
+import org.web.hikarihotelmanagement.dto.response.BookingDetailResponse;
 import org.web.hikarihotelmanagement.dto.response.BookingResponse;
 import org.web.hikarihotelmanagement.dto.response.BookingRoomResponse;
 import org.web.hikarihotelmanagement.entity.*;
@@ -42,6 +43,7 @@ public class BookingServiceImpl implements BookingService {
     private final RoomAvailabilityRepository roomAvailabilityRepository;
     private final RoomAvailabilityRequestRepository roomAvailabilityRequestRepository;
     private final VNPayService vnPayService;
+    private final org.web.hikarihotelmanagement.mapper.BookingMapper bookingMapper;
     
     private void validateDates(LocalDate checkInDate, LocalDate checkOutDate) {
         LocalDate today = LocalDate.now();
@@ -68,7 +70,7 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = new Booking();
         booking.setUser(user);
         booking.setBookingCode(generateBookingCode());
-        booking.setStatus(BookingStatus.PENDING);
+        booking.setStatus(BookingStatus.PAYMENT_PENDING);
         booking.setPaymentMethod(request.getPaymentMethod());
         booking.setAmount(BigDecimal.ZERO);
         
@@ -97,7 +99,7 @@ public class BookingServiceImpl implements BookingService {
             newRequest.setCheckIn(roomReq.getCheckInDate().atTime(14, 0));
             newRequest.setCheckOut(roomReq.getCheckOutDate().atTime(12, 0));
             newRequest.setNumberOfGuests(roomReq.getNumberOfGuests());
-            newRequest.setStatus(RequestStatus.PENDING);
+            newRequest.setStatus(RequestStatus.PAYMENT_PENDING);
             newRequest.setNote(roomReq.getNote());
             
             requests.add(newRequest);
@@ -218,5 +220,33 @@ public class BookingServiceImpl implements BookingService {
         response.setRooms(roomResponses);
         
         return response;
+    }
+    
+    @Override
+    public List<BookingDetailResponse> getUserBookings(String userEmail) {
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ApiException("Không tìm thấy người dùng"));
+        
+        List<Booking> bookings = bookingRepository.findByUserIdOrderByCreatedAtDesc(user.getId());
+        
+        return bookings.stream()
+                .map(bookingMapper::toBookingDetailResponse)
+                .collect(Collectors.toList());
+    }
+    
+    @Override
+    public BookingDetailResponse getBookingDetail(Long bookingId, String userEmail) {
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ApiException("Không tìm thấy người dùng"));
+        
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new ApiException("Không tìm thấy đơn đặt phòng"));
+        
+        // Kiểm tra booking có thuộc về user này không
+        if (!booking.getUser().getId().equals(user.getId())) {
+            throw new ApiException("Bạn không có quyền xem đơn đặt này");
+        }
+        
+        return bookingMapper.toBookingDetailResponse(booking);
     }
 }

@@ -16,6 +16,7 @@ import org.web.hikarihotelmanagement.repository.BookingRepository;
 import org.web.hikarihotelmanagement.repository.RequestRepository;
 import org.web.hikarihotelmanagement.repository.RoomAvailabilityRepository;
 import org.web.hikarihotelmanagement.repository.RoomAvailabilityRequestRepository;
+import org.web.hikarihotelmanagement.service.CustomerTierService;
 import org.web.hikarihotelmanagement.service.VNPayService;
 import org.web.hikarihotelmanagement.util.VNPayUtil;
 
@@ -35,13 +36,14 @@ public class VNPayServiceImpl implements VNPayService {
     private final RequestRepository requestRepository;
     private final RoomAvailabilityRepository roomAvailabilityRepository;
     private final RoomAvailabilityRequestRepository roomAvailabilityRequestRepository;
+    private final CustomerTierService customerTierService;
     
     @Override
     public String createPaymentUrl(Long bookingId, HttpServletRequest request) {
         Booking booking = bookingRepository.findById(bookingId)
             .orElseThrow(() -> new ApiException("Không tìm thấy booking"));
         
-        if (booking.getStatus() != BookingStatus.PENDING) {
+        if (booking.getStatus() != BookingStatus.PAYMENT_PENDING) {
             throw new ApiException("Booking không ở trạng thái chờ thanh toán");
         }
         
@@ -163,8 +165,18 @@ public class VNPayServiceImpl implements VNPayService {
                 .orElseThrow(() -> new ApiException("Không tìm thấy booking"));
             
             if ("00".equals(responseCode)) {
-                booking.setStatus(BookingStatus.CONFIRMED);
+                booking.setStatus(BookingStatus.PAYMENT_COMPLETED);
                 bookingRepository.save(booking);
+
+                List<Request> requests = requestRepository.findByBookingId(booking.getId());
+
+                for (Request req : requests) {
+                    req.setStatus(RequestStatus.PAYMENT_COMPLETED);
+                }
+                requestRepository.saveAll(requests);
+                
+                // Cập nhật thống kê và hạng khách hàng
+                customerTierService.updateUserStatistics(booking.getUser().getId(), booking.getAmount());
                 
                 result.put("status", "success");
                 result.put("message", "Thanh toán thành công");

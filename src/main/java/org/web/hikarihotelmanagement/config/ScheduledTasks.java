@@ -14,6 +14,7 @@ import org.web.hikarihotelmanagement.repository.BookingRepository;
 import org.web.hikarihotelmanagement.repository.RequestRepository;
 import org.web.hikarihotelmanagement.repository.RoomAvailabilityRepository;
 import org.web.hikarihotelmanagement.repository.RoomAvailabilityRequestRepository;
+import org.web.hikarihotelmanagement.service.CustomerTierService;
 import org.web.hikarihotelmanagement.service.UserService;
 
 import java.time.LocalDateTime;
@@ -25,6 +26,7 @@ import java.util.List;
 public class ScheduledTasks {
 
     private final UserService userService;
+    private final CustomerTierService customerTierService;
     private final BookingRepository bookingRepository;
     private final RequestRepository requestRepository;
     private final RoomAvailabilityRepository roomAvailabilityRepository;

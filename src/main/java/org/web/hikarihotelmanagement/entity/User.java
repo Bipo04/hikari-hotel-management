@@ -10,6 +10,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -48,6 +49,16 @@ public class User implements UserDetails {
 
     @Column(name = "is_verified", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
     private Boolean isVerified = false;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "customer_tier_id")
+    private CustomerTier customerTier;
+
+    @Column(name = "total_spent", precision = 15, scale = 2, nullable = false)
+    private BigDecimal totalSpent = BigDecimal.ZERO;
+
+    @Column(name = "total_bookings", nullable = false)
+    private Integer totalBookings = 0;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
