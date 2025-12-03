@@ -10,10 +10,16 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.web.hikarihotelmanagement.dto.request.ChangePasswordRequest;
 import org.web.hikarihotelmanagement.dto.request.UpdateProfileRequest;
+import org.web.hikarihotelmanagement.dto.response.BookingDetailResponse;
 import org.web.hikarihotelmanagement.dto.response.UserResponse;
+import org.web.hikarihotelmanagement.entity.User;
+import org.web.hikarihotelmanagement.repository.UserRepository;
+import org.web.hikarihotelmanagement.service.BookingService;
+import org.web.hikarihotelmanagement.service.CustomerTierService;
 import org.web.hikarihotelmanagement.service.UserService;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -24,6 +30,9 @@ import java.util.Map;
 public class UserController {
 
     private final UserService userService;
+    private final CustomerTierService customerTierService;
+    private final UserRepository userRepository;
+    private final BookingService bookingService;
 
     @GetMapping("/profile")
     @Operation(summary = "Lấy thông tin cá nhân")
@@ -52,11 +61,31 @@ public class UserController {
     ) {
         String email = authentication.getName();
         userService.changePassword(email, request);
-        
+
         Map<String, String> response = new HashMap<>();
         response.put("message", "Đổi mật khẩu thành công");
-        
+
         return ResponseEntity.ok(response);
     }
     
+    @GetMapping("/bookings")
+    @Operation(summary = "Lấy danh sách đơn đặt phòng của người dùng", 
+               description = "Trả về danh sách tất cả đơn đặt phòng của user đang đăng nhập")
+    public ResponseEntity<List<BookingDetailResponse>> getUserBookings(Authentication authentication) {
+        String email = authentication.getName();
+        List<BookingDetailResponse> bookings = bookingService.getUserBookings(email);
+        return ResponseEntity.ok(bookings);
+    }
+    
+    @GetMapping("/bookings/{bookingId}")
+    @Operation(summary = "Lấy chi tiết một đơn đặt phòng", 
+               description = "Trả về chi tiết đơn đặt phòng theo ID")
+    public ResponseEntity<BookingDetailResponse> getBookingDetail(
+            @PathVariable Long bookingId,
+            Authentication authentication
+    ) {
+        String email = authentication.getName();
+        BookingDetailResponse booking = bookingService.getBookingDetail(bookingId, email);
+        return ResponseEntity.ok(booking);
+    }
 }

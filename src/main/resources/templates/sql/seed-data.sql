@@ -19,19 +19,30 @@ TRUNCATE TABLE rooms;
 TRUNCATE TABLE room_types;
 TRUNCATE TABLE amenities;
 TRUNCATE TABLE users;
+TRUNCATE TABLE customer_tiers;
 SET FOREIGN_KEY_CHECKS = 1;
+
+-- ===============================================
+-- 0. CUSTOMER TIERS (4 hạng khách hàng)
+-- ===============================================
+INSERT INTO customer_tiers (code, name, min_spending, min_bookings, discount_percent, tier_order, description, active, created_at, updated_at) VALUES
+('BRONZE', 'Đồng', 0, 0, 0, 1, 'Hạng mặc định cho khách hàng mới', 1, NOW(), NOW()),
+('SILVER', 'Bạc', 20000000, 10, 5, 2, 'Dành cho khách hàng có từ 10 booking hoặc chi tiêu từ 20 triệu đồng', 1, NOW(), NOW()),
+('GOLD', 'Vàng', 50000000, 20, 10, 3, 'Dành cho khách hàng có từ 20 booking hoặc chi tiêu từ 50 triệu đồng', 1, NOW(), NOW()),
+('DIAMOND', 'Kim Cương', 100000000, 40, 15, 4, 'Hạng cao nhất dành cho khách hàng VIP', 1, NOW(), NOW());
 
 -- ===============================================
 -- 1. USERS (6 users: 1 admin + 5 regular users)
 -- Password: password123
+-- customer_tier_id: 1=BRONZE (mặc định), 2=SILVER, 3=GOLD, 4=DIAMOND
 -- ===============================================
-INSERT INTO users (email, password, name, phone, birth_date, role, status, is_verified, created_at, updated_at) VALUES
-('admin@hikari.com', '$2a$10$wxKEMAva8GNE.iZwM3k9iOFJtSVjDos9nI/EtmDTk8qxePVFkKwPO', 'Admin Hikari', '0901234567', '1990-01-01', 1, 1, 1, NOW(), NOW()),
-('user1@example.com', '$2a$10$wxKEMAva8GNE.iZwM3k9iOFJtSVjDos9nI/EtmDTk8qxePVFkKwPO', 'Nguyễn Văn A', '0912345678', '1995-05-15', 0, 1, 1, NOW(), NOW()),
-('user2@example.com', '$2a$10$wxKEMAva8GNE.iZwM3k9iOFJtSVjDos9nI/EtmDTk8qxePVFkKwPO', 'Trần Thị B', '0923456789', '1992-08-20', 0, 1, 1, NOW(), NOW()),
-('user3@example.com', '$2a$10$wxKEMAva8GNE.iZwM3k9iOFJtSVjDos9nI/EtmDTk8qxePVFkKwPO', 'Lê Văn C', '0934567890', '1998-03-10', 0, 1, 1, NOW(), NOW()),
-('user4@example.com', '$2a$10$wxKEMAva8GNE.iZwM3k9iOFJtSVjDos9nI/EtmDTk8qxePVFkKwPO', 'Phạm Thị D', '0945678901', '1994-11-25', 0, 1, 1, NOW(), NOW()),
-('user5@example.com', '$2a$10$wxKEMAva8GNE.iZwM3k9iOFJtSVjDos9nI/EtmDTk8qxePVFkKwPO', 'Hoàng Văn E', '0956789012', '1996-07-30', 0, 1, 1, NOW(), NOW());
+INSERT INTO users (email, password, name, phone, birth_date, role, status, is_verified, customer_tier_id, total_spent, total_bookings, created_at, updated_at) VALUES
+('admin@hikari.com', '$2a$10$wxKEMAva8GNE.iZwM3k9iOFJtSVjDos9nI/EtmDTk8qxePVFkKwPO', 'Admin Hikari', '0901234567', '1990-01-01', 1, 1, 1, 1, 0, 0, NOW(), NOW()),
+('user1@example.com', '$2a$10$wxKEMAva8GNE.iZwM3k9iOFJtSVjDos9nI/EtmDTk8qxePVFkKwPO', 'Nguyễn Văn A', '0912345678', '1995-05-15', 0, 1, 1, 1, 0, 0, NOW(), NOW()),
+('user2@example.com', '$2a$10$wxKEMAva8GNE.iZwM3k9iOFJtSVjDos9nI/EtmDTk8qxePVFkKwPO', 'Trần Thị B', '0923456789', '1992-08-20', 0, 1, 1, 2, 25000000, 12, NOW(), NOW()),
+('user3@example.com', '$2a$10$wxKEMAva8GNE.iZwM3k9iOFJtSVjDos9nI/EtmDTk8qxePVFkKwPO', 'Lê Văn C', '0934567890', '1998-03-10', 0, 1, 1, 3, 55000000, 22, NOW(), NOW()),
+('user4@example.com', '$2a$10$wxKEMAva8GNE.iZwM3k9iOFJtSVjDos9nI/EtmDTk8qxePVFkKwPO', 'Phạm Thị D', '0945678901', '1994-11-25', 0, 1, 1, 4, 120000000, 45, NOW(), NOW()),
+('user5@example.com', '$2a$10$wxKEMAva8GNE.iZwM3k9iOFJtSVjDos9nI/EtmDTk8qxePVFkKwPO', 'Hoàng Văn E', '0956789012', '1996-07-30', 0, 1, 1, 1, 5000000, 3, NOW(), NOW());
 
 -- ===============================================
 -- 2. AMENITIES (10 amenities)
@@ -380,6 +391,7 @@ WHERE ra.available_date BETWEEN DATE(r.check_in) AND DATE(DATE_SUB(r.check_out, 
 -- ===============================================
 
 SELECT '✅ SEED DATA COMPLETED!' AS status;
+SELECT COUNT(*) AS total_customer_tiers FROM customer_tiers;
 SELECT COUNT(*) AS total_users FROM users;
 SELECT COUNT(*) AS total_amenities FROM amenities;
 SELECT COUNT(*) AS total_room_types FROM room_types;
@@ -391,3 +403,15 @@ SELECT COUNT(*) AS total_requests FROM requests;
 SELECT COUNT(*) AS total_guests FROM guests;
 SELECT COUNT(*) AS total_reviews FROM reviews;
 SELECT COUNT(*) AS total_room_availability_requests FROM room_availability_requests;
+
+-- Hiển thị thông tin hạng khách hàng
+SELECT 
+    u.email,
+    u.name,
+    ct.name AS tier,
+    u.total_spent,
+    u.total_bookings,
+    ct.discount_percent AS discount
+FROM users u
+LEFT JOIN customer_tiers ct ON u.customer_tier_id = ct.id
+ORDER BY u.id;

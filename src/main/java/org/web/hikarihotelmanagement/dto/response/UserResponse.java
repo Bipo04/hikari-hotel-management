@@ -3,6 +3,7 @@ package org.web.hikarihotelmanagement.dto.response;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.web.hikarihotelmanagement.enums.Role;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Date;
 
@@ -31,6 +32,15 @@ public record UserResponse(
 
         @Schema(description = "Đã xác thực email chưa", example = "true")
         Boolean isVerified,
+
+        @Schema(description = "Mã hạng khách hàng", example = "SILVER")
+        String customerTier,
+
+        @Schema(description = "Tổng chi tiêu", example = "25000000")
+        BigDecimal totalSpent,
+
+        @Schema(description = "Tổng số booking", example = "12")
+        Integer totalBookings,
 
         @Schema(description = "Ngày tạo tài khoản")
         LocalDateTime createdAt,

@@ -1,12 +1,10 @@
 package org.web.hikarihotelmanagement.enums;
 
 public enum BookingStatus {
-    PENDING(0, "Đang chờ xử lý"),
-    CONFIRMED(1, "Đã xác nhận"),
-    PAYMENT_PENDING(2, "Chờ thanh toán"),
-    PAYMENT_COMPLETED(3, "Thanh toán thành công"),
-    CANCELLED(4, "Đã hủy"),
-    DECLINED(5, "Bị từ chối");
+    PAYMENT_PENDING(0, "Chờ thanh toán"),
+    PAYMENT_COMPLETED(1, "Đã thanh toán"),
+    CANCELLED(2, "Đã hủy"),
+    DECLINED(3, "Bị từ chối");
 
     private final int code;
     private final String description;

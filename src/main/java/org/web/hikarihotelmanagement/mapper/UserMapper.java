@@ -7,6 +7,7 @@ import org.web.hikarihotelmanagement.entity.User;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
+    @Mapping(target = "customerTier", expression = "java(user.getCustomerTier() != null ? user.getCustomerTier().getCode() : null)")
     UserResponse toUserResponse(User user);
     
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
