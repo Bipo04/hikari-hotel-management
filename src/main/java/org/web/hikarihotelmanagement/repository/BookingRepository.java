@@ -13,7 +13,9 @@ import java.util.Optional;
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
     Optional<Booking> findByBookingCode(String bookingCode);
-    
+
     @Query("SELECT b FROM Booking b WHERE b.status = 0 AND b.createdAt < :expirationTime")
     List<Booking> findExpiredPendingBookings(@Param("expirationTime") LocalDateTime expirationTime);
+
+    List<Booking> findByUserIdOrderByCreatedAtDesc(Long userId);
 }
