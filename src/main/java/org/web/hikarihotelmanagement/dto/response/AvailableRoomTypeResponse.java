@@ -20,4 +20,5 @@ public class AvailableRoomTypeResponse {
     private Integer capacity;
     private BigDecimal price;
     private Integer availableRoomCount; // Số lượng phòng còn trống
+    private String primaryImageUrl;
 }

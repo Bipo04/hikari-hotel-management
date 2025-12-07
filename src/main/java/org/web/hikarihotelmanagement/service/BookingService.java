@@ -1,6 +1,7 @@
 package org.web.hikarihotelmanagement.service;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.web.hikarihotelmanagement.dto.request.CheckInRequest;
 import org.web.hikarihotelmanagement.dto.request.CreateBookingRequest;
 import org.web.hikarihotelmanagement.dto.response.BookingDetailResponse;
 import org.web.hikarihotelmanagement.dto.response.BookingResponse;
@@ -13,4 +14,15 @@ public interface BookingService {
     List<BookingDetailResponse> getUserBookings(String userEmail);
     
     BookingDetailResponse getBookingDetail(Long bookingId, String userEmail);
+    
+    // Admin methods
+    List<BookingDetailResponse> getAllBookings();
+    
+    BookingDetailResponse getBookingDetailAdmin(Long bookingId);
+    
+    void cancelBooking(Long bookingId);
+    
+    void checkInRequest(CheckInRequest request);
+    
+    void checkOutRequest(Long requestId);
 }

@@ -9,7 +9,7 @@ import org.web.hikarihotelmanagement.entity.User;
 public interface UserMapper {
     @Mapping(target = "customerTier", expression = "java(user.getCustomerTier() != null ? user.getCustomerTier().getCode() : null)")
     UserResponse toUserResponse(User user);
-    
+
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateUserFromDto(UpdateProfileRequest request, @MappingTarget User user);
 }

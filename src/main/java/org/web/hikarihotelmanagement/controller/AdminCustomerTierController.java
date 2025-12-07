@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.web.hikarihotelmanagement.dto.request.CustomerTierRequest;
-import org.web.hikarihotelmanagement.dto.request.ReorderTierRequest;
+//import org.web.hikarihotelmanagement.dto.request.ReorderTierRequest;
 import org.web.hikarihotelmanagement.dto.response.CustomerTierDetailResponse;
 import org.web.hikarihotelmanagement.service.CustomerTierService;
 
@@ -68,15 +68,15 @@ public class AdminCustomerTierController {
         return ResponseEntity.ok(response);
     }
     
-    @PutMapping("/reorder")
-    @Operation(summary = "Sắp xếp lại thứ tự các hạng", 
-               description = "Cập nhật thứ tự cho nhiều tier cùng lúc dựa trên danh sách truyền vào")
-    public ResponseEntity<Map<String, String>> reorderTiers(@Valid @RequestBody ReorderTierRequest request) {
-        customerTierService.reorderTiers(request.getTiers());
-        
-        Map<String, String> response = new HashMap<>();
-        response.put("message", "Đã sắp xếp lại thứ tự các tier thành công");
-        
-        return ResponseEntity.ok(response);
-    }
+//    @PutMapping("/reorder")
+//    @Operation(summary = "Sắp xếp lại thứ tự các hạng",
+//               description = "Cập nhật thứ tự cho nhiều tier cùng lúc dựa trên danh sách truyền vào")
+//    public ResponseEntity<Map<String, String>> reorderTiers(@Valid @RequestBody ReorderTierRequest request) {
+//        customerTierService.reorderTiers(request.getTiers());
+//
+//        Map<String, String> response = new HashMap<>();
+//        response.put("message", "Đã sắp xếp lại thứ tự các tier thành công");
+//
+//        return ResponseEntity.ok(response);
+//    }
 }

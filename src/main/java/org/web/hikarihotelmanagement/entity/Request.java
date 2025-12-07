@@ -62,8 +62,5 @@ public class Request {
     private List<Guest> guests = new ArrayList<>();
 
     @OneToMany(mappedBy = "request", cascade = CascadeType.ALL)
-    private List<Review> reviews = new ArrayList<>();
-
-    @OneToMany(mappedBy = "request", cascade = CascadeType.ALL)
     private List<RoomAvailabilityRequest> roomAvailabilityRequests = new ArrayList<>();
 }

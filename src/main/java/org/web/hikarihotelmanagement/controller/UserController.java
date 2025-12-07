@@ -9,13 +9,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.web.hikarihotelmanagement.dto.request.ChangePasswordRequest;
+import org.web.hikarihotelmanagement.dto.request.CreateReviewRequest;
 import org.web.hikarihotelmanagement.dto.request.UpdateProfileRequest;
 import org.web.hikarihotelmanagement.dto.response.BookingDetailResponse;
+import org.web.hikarihotelmanagement.dto.response.ReviewResponse;
 import org.web.hikarihotelmanagement.dto.response.UserResponse;
 import org.web.hikarihotelmanagement.entity.User;
 import org.web.hikarihotelmanagement.repository.UserRepository;
 import org.web.hikarihotelmanagement.service.BookingService;
 import org.web.hikarihotelmanagement.service.CustomerTierService;
+import org.web.hikarihotelmanagement.service.ReviewService;
 import org.web.hikarihotelmanagement.service.UserService;
 
 import java.util.HashMap;
@@ -33,6 +36,7 @@ public class UserController {
     private final CustomerTierService customerTierService;
     private final UserRepository userRepository;
     private final BookingService bookingService;
+    private final ReviewService reviewService;
 
     @GetMapping("/profile")
     @Operation(summary = "Lấy thông tin cá nhân")
@@ -87,5 +91,17 @@ public class UserController {
         String email = authentication.getName();
         BookingDetailResponse booking = bookingService.getBookingDetail(bookingId, email);
         return ResponseEntity.ok(booking);
+    }
+    
+    @PostMapping("/reviews")
+    @Operation(summary = "Đánh giá đơn đặt phòng", 
+               description = "Tạo đánh giá cho booking sau khi tất cả các phòng đã checkout")
+    public ResponseEntity<ReviewResponse> createReview(
+            @Valid @RequestBody CreateReviewRequest request,
+            Authentication authentication
+    ) {
+        String email = authentication.getName();
+        ReviewResponse review = reviewService.createReview(request, email);
+        return ResponseEntity.ok(review);
     }
 }
