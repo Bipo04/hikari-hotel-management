@@ -30,25 +30,25 @@ import java.util.*;
 @RequiredArgsConstructor
 @Slf4j
 public class VNPayServiceImpl implements VNPayService {
-    
+
     private final VNPayConfig vnPayConfig;
     private final BookingRepository bookingRepository;
     private final RequestRepository requestRepository;
     private final RoomAvailabilityRepository roomAvailabilityRepository;
     private final RoomAvailabilityRequestRepository roomAvailabilityRequestRepository;
     private final CustomerTierService customerTierService;
-    
+
     @Override
     public String createPaymentUrl(Long bookingId, HttpServletRequest request) {
         Booking booking = bookingRepository.findById(bookingId)
-            .orElseThrow(() -> new ApiException("Không tìm thấy booking"));
-        
+                .orElseThrow(() -> new ApiException("Không tìm thấy booking"));
+
         if (booking.getStatus() != BookingStatus.PAYMENT_PENDING) {
             throw new ApiException("Booking không ở trạng thái chờ thanh toán");
         }
-        
+
         long amount = booking.getAmount().longValue() * 100;
-        
+
         Map<String, String> vnpParams = new HashMap<>();
         vnpParams.put("vnp_Version", "2.1.0");
         vnpParams.put("vnp_Command", "pay");
@@ -61,21 +61,21 @@ public class VNPayServiceImpl implements VNPayService {
         vnpParams.put("vnp_Locale", "vn");
         vnpParams.put("vnp_ReturnUrl", vnPayConfig.getVnpReturnUrl());
         vnpParams.put("vnp_IpAddr", getIpAddress(request));
-        
+
         Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
         String vnpCreateDate = formatter.format(cld.getTime());
         vnpParams.put("vnp_CreateDate", vnpCreateDate);
-        
+
         cld.add(Calendar.MINUTE, 15);
         String vnpExpireDate = formatter.format(cld.getTime());
         vnpParams.put("vnp_ExpireDate", vnpExpireDate);
-        
+
         List<String> fieldNames = new ArrayList<>(vnpParams.keySet());
         Collections.sort(fieldNames);
         StringBuilder hashData = new StringBuilder();
         StringBuilder query = new StringBuilder();
-        
+
         Iterator<String> itr = fieldNames.iterator();
         while (itr.hasNext()) {
             String fieldName = itr.next();
@@ -97,18 +97,18 @@ public class VNPayServiceImpl implements VNPayService {
                 }
             }
         }
-        
+
         log.info("Hash data: {}", hashData.toString());
-        
+
         String queryUrl = query.toString();
         String vnpSecureHash = VNPayUtil.hmacSHA512(vnPayConfig.getVnpHashSecret(), hashData.toString());
         queryUrl += "&vnp_SecureHash=" + vnpSecureHash;
-        
+
         log.info("Payment URL: {}", vnPayConfig.getVnpUrl() + "?" + queryUrl);
-        
+
         return vnPayConfig.getVnpUrl() + "?" + queryUrl;
     }
-    
+
     @Override
     @Transactional
     public Map<String, String> handleCallback(HttpServletRequest request) {
@@ -120,14 +120,14 @@ public class VNPayServiceImpl implements VNPayService {
                 fields.put(fieldName, fieldValue);
             }
         }
-        
+
         String vnpSecureHash = request.getParameter("vnp_SecureHash");
         fields.remove("vnp_SecureHashType");
         fields.remove("vnp_SecureHash");
-        
+
         log.info("VNPay callback fields: {}", fields);
         log.info("VNPay SecureHash from callback: {}", vnpSecureHash);
-        
+
         List<String> fieldNames = new ArrayList<>(fields.keySet());
         Collections.sort(fieldNames);
         StringBuilder hashData = new StringBuilder();
@@ -148,22 +148,22 @@ public class VNPayServiceImpl implements VNPayService {
                 }
             }
         }
-        
+
         log.info("Hash data for callback: {}", hashData.toString());
         log.info("Hash secret: {}", vnPayConfig.getVnpHashSecret());
-        
+
         String signValue = VNPayUtil.hmacSHA512(vnPayConfig.getVnpHashSecret(), hashData.toString());
         log.info("Generated SecureHash: {}", signValue);
-        
+
         Map<String, String> result = new HashMap<>();
-        
+
         if (signValue.equals(vnpSecureHash)) {
             String bookingCode = request.getParameter("vnp_TxnRef");
             String responseCode = request.getParameter("vnp_ResponseCode");
-            
+
             Booking booking = bookingRepository.findByBookingCode(bookingCode)
-                .orElseThrow(() -> new ApiException("Không tìm thấy booking"));
-            
+                    .orElseThrow(() -> new ApiException("Không tìm thấy booking"));
+
             if ("00".equals(responseCode)) {
                 booking.setStatus(BookingStatus.PAYMENT_COMPLETED);
                 bookingRepository.save(booking);
@@ -174,19 +174,19 @@ public class VNPayServiceImpl implements VNPayService {
                     req.setStatus(RequestStatus.PAYMENT_COMPLETED);
                 }
                 requestRepository.saveAll(requests);
-                
+
                 // Cập nhật thống kê và hạng khách hàng
                 customerTierService.updateUserStatistics(booking.getUser().getId(), booking.getAmount());
-                
+
                 result.put("status", "success");
                 result.put("message", "Thanh toán thành công");
                 result.put("bookingCode", bookingCode);
             } else {
                 booking.setStatus(BookingStatus.CANCELLED);
                 bookingRepository.save(booking);
-                
+
                 unlockRooms(booking);
-                
+
                 result.put("status", "failed");
                 result.put("message", "Thanh toán thất bại");
                 result.put("bookingCode", bookingCode);
@@ -196,35 +196,35 @@ public class VNPayServiceImpl implements VNPayService {
             result.put("status", "invalid");
             result.put("message", "Chữ ký không hợp lệ");
         }
-        
+
         return result;
     }
-    
+
     private void unlockRooms(Booking booking) {
         List<Request> requests = requestRepository.findByBookingId(booking.getId());
-        
+
         for (Request req : requests) {
             req.setStatus(RequestStatus.CANCELLED);
-            
+
             roomAvailabilityRequestRepository.deleteByRequestId(req.getId());
-            
+
             List<RoomAvailability> availabilities = roomAvailabilityRepository.findByRoomAndDateRange(
-                req.getRoom().getId(),
-                req.getCheckIn().toLocalDate(),
-                req.getCheckOut().toLocalDate().minusDays(1)
+                    req.getRoom().getId(),
+                    req.getCheckIn().toLocalDate(),
+                    req.getCheckOut().toLocalDate().minusDays(1)
             );
-            
+
             for (RoomAvailability availability : availabilities) {
                 availability.setIsAvailable(true);
             }
-            
+
             roomAvailabilityRepository.saveAll(availabilities);
         }
-        
+
         requestRepository.saveAll(requests);
         log.info("Unlocked rooms for cancelled booking: {}", booking.getBookingCode());
     }
-    
+
     private String getIpAddress(HttpServletRequest request) {
         String ipAddress = request.getHeader("X-FORWARDED-FOR");
         if (ipAddress == null) {

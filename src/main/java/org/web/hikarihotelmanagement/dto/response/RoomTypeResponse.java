@@ -14,6 +14,8 @@ public class RoomTypeResponse {
     private String description;
     private Integer capacity;
     private BigDecimal price;
+    private String primaryImageUrl;
+
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

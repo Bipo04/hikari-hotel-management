@@ -41,14 +41,4 @@ public class AdminRoomTypeController {
         return ResponseEntity.ok(roomTypeMapper.toResponse(updated));
     }
 
-    // Xóa loại phòng (ADMIN)
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteRoomType(@PathVariable Long id) {
-        try {
-            roomTypeService.deleteRoomType(id);
-            return ResponseEntity.noContent().build();
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
-    }
 }
