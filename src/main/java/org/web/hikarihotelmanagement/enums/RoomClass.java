@@ -28,6 +28,6 @@ public enum RoomClass {
                 return roomClass;
             }
         }
-        throw new IllegalArgumentException("Hạng phòng không hợp lệ " + code);
+        throw new IllegalArgumentException("Invalid RoomClass code: " + code);
     }
 }

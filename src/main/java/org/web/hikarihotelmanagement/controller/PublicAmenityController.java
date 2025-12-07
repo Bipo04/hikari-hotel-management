@@ -9,17 +9,11 @@ import org.web.hikarihotelmanagement.service.AmenityService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/amenities")
+@RequestMapping("/api/public/amenities")
 @RequiredArgsConstructor
-public class AmenityController {
+public class PublicAmenityController {
 
     private final AmenityService service;
-
-    @PostMapping
-    public AmenityResponse create(@RequestBody AmenityRequest req) { return service.create(req); }
-
-    @PutMapping("/{id}")
-    public AmenityResponse update(@PathVariable Long id, @RequestBody AmenityRequest req) { return service.update(id, req); }
 
     @GetMapping("/{id}")
     public AmenityResponse get(@PathVariable Long id) { return service.getById(id); }

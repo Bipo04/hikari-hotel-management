@@ -4,7 +4,7 @@
 -- ===============================================
 
 -- Tạo database nếu chưa có
-USE HikariHotel;
+USE `hikari-hotel`;
 
 -- Xóa dữ liệu cũ (theo thứ tự foreign key)
 SET FOREIGN_KEY_CHECKS = 0;
@@ -53,12 +53,12 @@ INSERT INTO amenities (name, description, created_at, updated_at) VALUES
 -- class: 0=Standard, 1=Superior, 2=Business, 3=Suite
 -- ===============================================
 INSERT INTO room_types (name, class, description, capacity, price, created_at, updated_at) VALUES
-('Phòng đơn Standard', 0, 'Phòng cơ bản cho 1 người', 1, 500.00, NOW(), NOW()),
-('Phòng đôi Standard', 0, 'Phòng cơ bản cho 2 người', 2, 800.00, NOW(), NOW()),
-('Phòng đơn Superior', 1, 'Phòng cao cấp 1 giường', 1, 700.00, NOW(), NOW()),
-('Phòng đôi Superior', 1, 'Phòng cao cấp 2 giường', 2, 1000.00, NOW(), NOW()),
-('Phòng đôi Business', 2, 'Dành cho khách công tác', 2, 1200.00, NOW(), NOW()),
-('Suite gia đình', 3, 'Phòng sang trọng, nhiều tiện nghi', 4, 2500.00, NOW(), NOW());
+('Phòng đơn Standard', 0, 'Phòng cơ bản cho 1 người', 1, 500000.00, NOW(), NOW()),
+('Phòng đôi Standard', 0, 'Phòng cơ bản cho 2 người', 2, 800000.00, NOW(), NOW()),
+('Phòng đơn Superior', 1, 'Phòng cao cấp 1 giường', 1, 700000.00, NOW(), NOW()),
+('Phòng đôi Superior', 1, 'Phòng cao cấp 2 giường', 2, 1000000.00, NOW(), NOW()),
+('Phòng đôi Business', 2, 'Dành cho khách công tác', 2, 1200000.00, NOW(), NOW()),
+('Suite gia đình', 3, 'Phòng sang trọng, nhiều tiện nghi', 4, 2500000.00, NOW(), NOW());
 
 -- ===============================================
 -- ===============================================

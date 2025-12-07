@@ -2,8 +2,9 @@ package org.web.hikarihotelmanagement.enums;
 
 public enum RoomStatus {
     AVAILABLE(0, "Đang hoạt động"),
-    MAINTENANCE(2, "Đang bảo trì"),
-    OUT_OF_SERVICE(5, "Ngưng hoạt động");
+    MAINTENANCE(1, "Đang bảo trì"),
+    CLEANING(2, "Đang dọn dẹp"),
+    OUT_OF_SERVICE(3, "Ngưng hoạt động");
 
     private final int code;
     private final String description;

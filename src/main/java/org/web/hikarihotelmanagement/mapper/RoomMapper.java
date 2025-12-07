@@ -1,33 +1,43 @@
 package org.web.hikarihotelmanagement.mapper;
 
+import org.mapstruct.*;
 import org.web.hikarihotelmanagement.dto.request.RoomRequest;
 import org.web.hikarihotelmanagement.dto.response.RoomResponse;
 import org.web.hikarihotelmanagement.entity.Room;
 import org.web.hikarihotelmanagement.entity.RoomType;
-import org.web.hikarihotelmanagement.enums.RoomStatus;
+import org.web.hikarihotelmanagement.repository.RoomTypeRepository;
 
-public class RoomMapper {
+@Mapper(componentModel = "spring")
+public interface RoomMapper {
 
-    public static RoomResponse toResponse(Room entity) {
-        RoomResponse dto = new RoomResponse();
-        dto.setId(entity.getId());
-        dto.setRoomNumber(entity.getRoomNumber());
-        dto.setRoomTypeName(entity.getRoomType() != null ? entity.getRoomType().getName() : null);
-        dto.setDescription(entity.getDescription());
-        dto.setStatus(entity.getStatus() != null ? entity.getStatus().name() : null);
-        dto.setCreatedAt(entity.getCreatedAt());
-        dto.setUpdatedAt(entity.getUpdatedAt());
-        return dto;
-    }
+    // ENTITY -> RESPONSE
+    @Mapping(target = "roomTypeId", source = "roomType.id")
+    @Mapping(target = "roomTypeName", source = "roomType.name")
+    RoomResponse toResponse(Room room);
 
-    public static Room toEntity(RoomRequest req, RoomType roomType) {
-        Room room = new Room();
-        room.setRoomNumber(req.getRoomNumber());
-        room.setRoomType(roomType);
-        room.setDescription(req.getDescription());
-        if (req.getStatus() != null) {
-            room.setStatus(RoomStatus.valueOf(req.getStatus()));
-        }
-        return room;
+    // REQUEST -> ENTITY (create)
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "roomType", source = "roomTypeId", qualifiedByName = "mapRoomType")
+    @Mapping(target = "roomAvailabilities", ignore = true)
+    @Mapping(target = "requests", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    Room toEntity(RoomRequest dto, @Context RoomTypeRepository roomTypeRepo);
+
+    // REQUEST -> ENTITY (update)
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "roomType", source = "roomTypeId", qualifiedByName = "mapRoomType")
+    @Mapping(target = "roomAvailabilities", ignore = true)
+    @Mapping(target = "requests", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    void updateEntity(@MappingTarget Room room, RoomRequest dto,
+                      @Context RoomTypeRepository roomTypeRepo);
+
+    @Named("mapRoomType")
+    default RoomType mapRoomType(Long roomTypeId, @Context RoomTypeRepository roomTypeRepo) {
+        if (roomTypeId == null) return null;
+        return roomTypeRepo.findById(roomTypeId)
+                .orElseThrow(() -> new IllegalArgumentException("RoomType not found: " + roomTypeId));
     }
 }

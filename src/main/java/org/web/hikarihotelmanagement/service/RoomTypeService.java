@@ -1,17 +1,18 @@
 package org.web.hikarihotelmanagement.service;
 
-import org.web.hikarihotelmanagement.dto.request.RoomTypeRequest;
-import org.web.hikarihotelmanagement.dto.response.RoomTypeResponse;
+import org.web.hikarihotelmanagement.dto.request.AvailableRoomTypeRequest;
+import org.web.hikarihotelmanagement.dto.response.AvailableRoomTypeResponse;
+import org.web.hikarihotelmanagement.dto.response.RoomTypeDetailResponse;
+import org.web.hikarihotelmanagement.entity.RoomType;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface RoomTypeService {
-    RoomTypeResponse create(RoomTypeRequest req);
-    RoomTypeResponse update(Long id, RoomTypeRequest req);
-    RoomTypeResponse getById(Long id);
-    List<RoomTypeResponse> getAll();
-
-    RoomTypeResponse removeAmenity(Long roomTypeId, Long amenityId);
-    RoomTypeResponse addAmenities(Long roomTypeId, List<Long> amenityIds);
-
+    RoomType createRoomType(RoomType roomType);
+    List<RoomType> getAllRoomTypes();
+    RoomType updateRoomType(Long id, RoomType roomTypeDetails);
+    List<AvailableRoomTypeResponse> getAvailableRoomTypes(AvailableRoomTypeRequest request);
+    RoomTypeDetailResponse getRoomTypeDetailWithAvailableRooms(Long roomTypeId, LocalDate checkInDate, LocalDate checkOutDate);
 }

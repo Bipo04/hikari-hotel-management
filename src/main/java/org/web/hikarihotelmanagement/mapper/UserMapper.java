@@ -8,7 +8,7 @@ import org.web.hikarihotelmanagement.entity.User;
 @Mapper(componentModel = "spring")
 public interface UserMapper {
     UserResponse toUserResponse(User user);
-    
+
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateUserFromDto(UpdateProfileRequest request, @MappingTarget User user);
 }

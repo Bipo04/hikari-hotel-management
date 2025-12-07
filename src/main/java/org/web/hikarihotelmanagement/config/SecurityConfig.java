@@ -1,7 +1,6 @@
 package org.web.hikarihotelmanagement.config;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpMethod;
 import org.web.hikarihotelmanagement.filter.JwtAuthenticationFilter;
 import org.web.hikarihotelmanagement.service.impl.UserDetailsServiceImpl;
 import org.springframework.context.annotation.Bean;
@@ -36,27 +35,16 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(req -> req
+                        // Public endpoints
                         .requestMatchers(
                                 "/api/auth/**",
-                                "/swagger-ui/**", "/v3/api-docs/**",
-                                "/api/setup/**"
-                        ).permitAll()
-
-                        .requestMatchers(HttpMethod.GET, "/api/room-types/**").permitAll()
-
-                        .requestMatchers(HttpMethod.POST, "/api/room-types/**").hasAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/room-types/**").hasAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/room-types/**").hasAuthority("ADMIN")
-
-                        .requestMatchers(HttpMethod.GET, "/api/amenities/**").permitAll()
-
-                        .requestMatchers(HttpMethod.POST, "/api/amenities/**").hasAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/amenities/**").hasAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/amenities/**").hasAuthority("ADMIN")
-
+                                "/swagger-ui/**", "/v3/api-docs/**", "/ws/**",
+                                "/api/public/**")
+                        .permitAll()
+                        .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
+                        .requestMatchers("/api/user/**").hasAnyAuthority("USER", "ADMIN")
                         .anyRequest().authenticated()
                 )
-
                 .userDetailsService(userDetailsServiceImpl)
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -69,7 +57,11 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of("*"));
+        configuration.setAllowedOriginPatterns(List.of(
+                "https://*.ngrok-free.dev",
+                "http://localhost:*",
+                "http://127.0.0.1:*"
+        ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
@@ -77,7 +69,6 @@ public class SecurityConfig {
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
-
         return source;
     }
 

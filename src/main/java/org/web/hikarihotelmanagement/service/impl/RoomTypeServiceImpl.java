@@ -2,102 +2,187 @@ package org.web.hikarihotelmanagement.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.web.hikarihotelmanagement.dto.request.RoomTypeRequest;
-import org.web.hikarihotelmanagement.dto.response.RoomTypeResponse;
-import org.web.hikarihotelmanagement.entity.Amenity;
 import org.web.hikarihotelmanagement.entity.RoomType;
-import org.web.hikarihotelmanagement.entity.RoomTypeAmenity;
-import org.web.hikarihotelmanagement.enums.RoomClass;
+// Sửa: Xóa import cũ không còn tồn tại
+// import org.web.hikarihotelmanagement.mapper.RoomTypeMapper2;
+// Giữ lại import mapper đã đổi tên
+import org.web.hikarihotelmanagement.entity.RoomTypeImage;
 import org.web.hikarihotelmanagement.mapper.RoomTypeMapper;
-import org.web.hikarihotelmanagement.repository.AmenityRepository;
-import org.web.hikarihotelmanagement.repository.RoomTypeAmenityRepository;
 import org.web.hikarihotelmanagement.repository.RoomTypeRepository;
 import org.web.hikarihotelmanagement.service.RoomTypeService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.annotation.Transactional;
+import org.web.hikarihotelmanagement.dto.request.AvailableRoomTypeRequest;
+import org.web.hikarihotelmanagement.dto.response.AvailableRoomTypeResponse;
+import org.web.hikarihotelmanagement.dto.response.RoomTypeDetailResponse;
+import org.web.hikarihotelmanagement.entity.Amenity;
+import org.web.hikarihotelmanagement.entity.Room;
+import org.web.hikarihotelmanagement.exception.ApiException;
+import org.web.hikarihotelmanagement.repository.RoomRepository2;
 
-import jakarta.transaction.Transactional;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class RoomTypeServiceImpl implements RoomTypeService {
 
-    private final RoomTypeRepository roomTypeRepo;
-    private final AmenityRepository amenityRepo;
-    private final RoomTypeAmenityRepository rtaRepo;
+    private final RoomTypeRepository roomTypeRepository;
+    private final RoomRepository2 roomRepository2;
+
+    // Đảm bảo tên biến này khớp với tên interface mới: RoomTypeMapper
+    private final RoomTypeMapper roomTypeMapper;
+
 
     @Override
-    public RoomTypeResponse create(RoomTypeRequest req) {
-        RoomType rt = new RoomType();
-        rt.setName(req.getName());
-        rt.setDescription(req.getDescription());
-        rt.setCapacity(req.getCapacity());
-        rt.setPrice(req.getPrice());
-        if (req.getRoomClass() != null) rt.setRoomClass(RoomClass.valueOf(req.getRoomClass()));
-        roomTypeRepo.save(rt);
-        return RoomTypeMapper.toResponse(rt);
+    public RoomType createRoomType(RoomType roomType) {
+        Optional<RoomType> existing = roomTypeRepository.findByName(roomType.getName());
+        if (existing.isPresent()) {
+            throw new IllegalArgumentException("Tên loại phòng này đã tồn tại");
+        }
+        return roomTypeRepository.save(roomType);
     }
 
     @Override
-    public RoomTypeResponse update(Long id, RoomTypeRequest req) {
-        RoomType rt = roomTypeRepo.findById(id).orElseThrow(() -> new RuntimeException("Not found"));
-        rt.setName(req.getName());
-        rt.setDescription(req.getDescription());
-        rt.setCapacity(req.getCapacity());
-        rt.setPrice(req.getPrice());
-        if (req.getRoomClass() != null) rt.setRoomClass(RoomClass.valueOf(req.getRoomClass()));
-        return RoomTypeMapper.toResponse(rt);
+    public List<RoomType> getAllRoomTypes() {
+        return roomTypeRepository.findAll();
     }
 
+
     @Override
-    public RoomTypeResponse getById(Long id) {
-        RoomType rt = roomTypeRepo.findById(id).orElseThrow(() -> new RuntimeException("Not found"));
-        return RoomTypeMapper.toResponse(rt);
+    public RoomType updateRoomType(Long id, RoomType roomTypeDetails) {
+        RoomType existing = roomTypeRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy phòng với id: " + id));
+
+        existing.setName(roomTypeDetails.getName());
+        existing.setRoomClass(roomTypeDetails.getRoomClass());
+        existing.setDescription(roomTypeDetails.getDescription());
+        existing.setCapacity(roomTypeDetails.getCapacity());
+        existing.setPrice(roomTypeDetails.getPrice());
+
+        return roomTypeRepository.save(existing);
     }
 
+
     @Override
-    public List<RoomTypeResponse> getAll() {
-        return roomTypeRepo.findAll().stream().map(RoomTypeMapper::toResponse).collect(Collectors.toList());
+    @Transactional(readOnly = true)
+    public List<AvailableRoomTypeResponse> getAvailableRoomTypes(AvailableRoomTypeRequest request) {
+        validateDates(request.getCheckInDate(), request.getCheckOutDate());
+
+        long numberOfDays = ChronoUnit.DAYS.between(request.getCheckInDate(), request.getCheckOutDate());
+
+        List<RoomType> availableRoomTypes = roomTypeRepository.findAvailableRoomTypes(
+                request.getCheckInDate(),
+                request.getCheckOutDate().minusDays(1)
+        );
+
+        return availableRoomTypes.stream()
+                .map(roomType -> {
+                    AvailableRoomTypeResponse response =
+                            roomTypeMapper.toAvailableRoomTypeResponse(roomType);
+
+                    Long availableCount = roomRepository2.countAvailableRoomsByRoomType(
+                            roomType.getId(),
+                            request.getCheckInDate(),
+                            request.getCheckOutDate().minusDays(1),
+                            numberOfDays
+                    );
+                    response.setAvailableRoomCount(availableCount != null ? availableCount.intValue() : 0);
+
+                    // NEW: set primary image url
+                    String primaryImageUrl = roomType.getImages().stream()
+                            .filter(img -> Boolean.TRUE.equals(img.getIsPrimary()))
+                            .map(RoomTypeImage::getImageUrl)
+                            .findFirst()
+                            .orElse(null);
+                    response.setPrimaryImageUrl(primaryImageUrl);
+
+                    return response;
+                })
+                .filter(response -> response.getAvailableRoomCount() > 0)
+                .collect(Collectors.toList());
     }
 
+
     @Override
-    @Transactional
-    public RoomTypeResponse addAmenities(Long roomTypeId, List<Long> amenityIds) {
+    @Transactional(readOnly = true)
+    public RoomTypeDetailResponse getRoomTypeDetailWithAvailableRooms(
+            Long roomTypeId,
+            LocalDate checkInDate,
+            LocalDate checkOutDate
+    ) {
 
-        RoomType roomType = roomTypeRepo.findById(roomTypeId)
-                .orElseThrow(() -> new RuntimeException("RoomType not found"));
-
-        List<Amenity> amenities = amenityRepo.findAllById(amenityIds);
-
-        if (amenities.isEmpty()) {
-            throw new RuntimeException("No valid amenities found");
+        // Nếu không truyền ngày → chỉ trả thông tin + tất cả phòng
+        if (checkInDate == null || checkOutDate == null) {
+            return getRoomTypeDetailWithoutDate(roomTypeId);
         }
 
-        // Xóa các quan hệ cũ để tránh trùng lặp
-        roomType.getRoomTypeAmenities().clear();
+        // Ngược lại → logic kiểm tra ngày + lọc phòng trống
+        validateDates(checkInDate, checkOutDate);
 
-        // Thêm mới quan hệ RoomTypeAmenity
-        for (Amenity amenity : amenities) {
-            RoomTypeAmenity rta = new RoomTypeAmenity();
-            rta.setRoomType(roomType);
-            rta.setAmenity(amenity);
-            roomType.getRoomTypeAmenities().add(rta);
-        }
+        LocalDate lastNightDate = checkOutDate.minusDays(1);
+        long numberOfDays = ChronoUnit.DAYS.between(checkInDate, lastNightDate) + 1;
 
-        roomTypeRepo.save(roomType);
+        RoomType roomType = roomTypeRepository.findById(roomTypeId)
+                .orElseThrow(() -> new ApiException("Không tìm thấy loại phòng"));
 
-        return RoomTypeMapper.toResponse(roomType);
+        RoomTypeDetailResponse response = roomTypeMapper.toRoomTypeDetailResponse(roomType);
+
+        List<Amenity> amenities = roomType.getRoomTypeAmenities().stream()
+                .map(rta -> rta.getAmenity())
+                .collect(Collectors.toList());
+
+        response.setAmenities(roomTypeMapper.toAmenityResponseList(amenities));
+
+        List<Room> availableRooms = roomRepository2.findAvailableRoomsByRoomType(
+                roomTypeId,
+                checkInDate,
+                lastNightDate,
+                numberOfDays
+        );
+
+        response.setAvailableRooms(roomTypeMapper.toRoomDetailResponseList(availableRooms));
+
+        return response;
+    }
+
+    private RoomTypeDetailResponse getRoomTypeDetailWithoutDate(Long roomTypeId) {
+
+        RoomType roomType = roomTypeRepository.findById(roomTypeId)
+                .orElseThrow(() -> new ApiException("Không tìm thấy loại phòng"));
+
+        RoomTypeDetailResponse response = roomTypeMapper.toRoomTypeDetailResponse(roomType);
+
+        List<Amenity> amenities = roomType.getRoomTypeAmenities().stream()
+                .map(rta -> rta.getAmenity())
+                .collect(Collectors.toList());
+
+        response.setAmenities(roomTypeMapper.toAmenityResponseList(amenities));
+
+        // Lấy toàn bộ phòng, không lọc theo ngày
+        List<Room> rooms = roomType.getRooms();
+        response.setAvailableRooms(roomTypeMapper.toRoomDetailResponseList(rooms));
+
+        return response;
     }
 
 
-    @Override
-    @Transactional
-    public RoomTypeResponse removeAmenity(Long roomTypeId, Long amenityId) {
-        List<RoomTypeAmenity> list = rtaRepo.findByRoomTypeId(roomTypeId);
-        for (RoomTypeAmenity rta : list) {
-            if (rta.getAmenity().getId().equals(amenityId)) rtaRepo.delete(rta);
+    private void validateDates(LocalDate checkInDate, LocalDate checkOutDate) {
+        if (checkInDate == null || checkOutDate == null) return;
+
+        LocalDate today = LocalDate.now();
+
+        if (checkInDate.isBefore(today)) {
+            throw new ApiException("Ngày check-in không thể là ngày trong quá khứ");
         }
-        RoomType rt = roomTypeRepo.findById(roomTypeId).orElseThrow(() -> new RuntimeException("Not found"));
-        return RoomTypeMapper.toResponse(rt);
+
+        if (!checkOutDate.isAfter(checkInDate)) {
+            throw new ApiException("Ngày check-out phải sau ngày check-in");
+        }
     }
+
 }

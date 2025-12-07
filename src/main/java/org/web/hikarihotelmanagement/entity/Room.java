@@ -20,7 +20,7 @@ import java.util.List;
 @AllArgsConstructor
 @Table(name = "rooms")
 public class Room {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -45,6 +45,10 @@ public class Room {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    // soft delete
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
 
     // Relationships
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL)
