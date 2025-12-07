@@ -1,39 +1,43 @@
 package org.web.hikarihotelmanagement.mapper;
 
-import org.web.hikarihotelmanagement.dto.response.RoomTypeResponse;
-import org.web.hikarihotelmanagement.entity.RoomType;
-import org.web.hikarihotelmanagement.entity.RoomTypeAmenity;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.web.hikarihotelmanagement.dto.request.RoomTypeRequest;
+import org.web.hikarihotelmanagement.dto.response.*;
+import org.web.hikarihotelmanagement.entity.*;
 
-import java.util.stream.Collectors;
+import java.util.List;
 
-public class RoomTypeMapper {
+@Mapper(componentModel = "spring")
+public interface RoomTypeMapper {
 
-    public static RoomTypeResponse toResponse(RoomType entity) {
-        RoomTypeResponse dto = new RoomTypeResponse();
-        dto.setId(entity.getId());
-        dto.setName(entity.getName());
-        dto.setRoomClass(entity.getRoomClass() != null ? entity.getRoomClass().name() : null);
-        dto.setDescription(entity.getDescription());
-        dto.setCapacity(entity.getCapacity());
-        dto.setPrice(entity.getPrice());
-        dto.setCreatedAt(entity.getCreatedAt());
-        dto.setUpdatedAt(entity.getUpdatedAt());
+    RoomType toEntity(RoomTypeRequest request);
 
-        if (entity.getRoomTypeAmenities() != null) {
-            dto.setAmenities(
-                    entity.getRoomTypeAmenities().stream()
-                            .map(RoomTypeAmenity::getAmenity)
-                            .map(a -> {
-                                RoomTypeResponse.AmenityResponse ar = new RoomTypeResponse.AmenityResponse();
-                                ar.setId(a.getId());
-                                ar.setName(a.getName());
-                                ar.setDescription(a.getDescription());
-                                return ar;
-                            })
-                            .collect(Collectors.toList())
-            );
-        }
+    @Mapping(
+            target = "primaryImageUrl",
+            expression = "java(entity.getImages() == null ? null : entity.getImages().stream()" +
+                    ".filter(img -> Boolean.TRUE.equals(img.getIsPrimary()))" +
+                    ".map(img -> img.getImageUrl())" +
+                    ".findFirst().orElse(null))"
+    )
+    RoomTypeResponse toResponse(RoomType entity);
 
-        return dto;
-    }
+    @Mapping(
+            target = "primaryImageUrl",
+            expression = "java(roomType.getImages() == null ? null : roomType.getImages().stream()" +
+                    ".filter(img -> Boolean.TRUE.equals(img.getIsPrimary()))" +
+                    ".map(img -> img.getImageUrl())" +
+                    ".findFirst().orElse(null))"
+    )
+    AvailableRoomTypeResponse toAvailableRoomTypeResponse(RoomType roomType);
+
+    RoomTypeDetailResponse toRoomTypeDetailResponse(RoomType roomType);
+
+    AmenityResponse toAmenityResponse(Amenity amenity);
+
+    List<AmenityResponse> toAmenityResponseList(List<Amenity> amenities);
+
+    RoomDetailResponse toRoomDetailResponse(Room room);
+
+    List<RoomDetailResponse> toRoomDetailResponseList(List<Room> rooms);
 }

@@ -36,34 +36,21 @@ public class PublicRoomTypeController {
         return ResponseEntity.ok(list);
     }
 
-    // Lấy chi tiết 1 loại phòng theo ID (PUBLIC)
-    @GetMapping("/{id}")
-    public ResponseEntity<RoomTypeResponse> getRoomTypeById(@PathVariable Long id) {
-        return roomTypeService.getRoomTypeById(id)
-                .map(roomType -> ResponseEntity.ok(roomTypeMapper.toResponse(roomType)))
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    // Tìm loại phòng theo tên (PUBLIC)
-    @GetMapping("/search")
-    public ResponseEntity<RoomType> getRoomTypeByName(@RequestParam String name) {
-        return roomTypeService.getRoomTypeByName(name)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
 
     // Lấy danh sách các loại phòng có phòng trống (PUBLIC)
-    @PostMapping("/available")
+    @GetMapping("/available")
     @Operation(
             summary = "Lấy danh sách các loại phòng có phòng trống",
             description = "Trả về danh sách các loại phòng có phòng trống trong khoảng thời gian check-in và check-out"
     )
     public ResponseEntity<List<AvailableRoomTypeResponse>> getAvailableRoomTypes(
-            @Valid @RequestBody AvailableRoomTypeRequest request
+            @Valid @ModelAttribute AvailableRoomTypeRequest request
     ) {
-        List<AvailableRoomTypeResponse> availableRoomTypes = roomTypeService.getAvailableRoomTypes(request);
+        List<AvailableRoomTypeResponse> availableRoomTypes =
+                roomTypeService.getAvailableRoomTypes(request);
         return ResponseEntity.ok(availableRoomTypes);
     }
+
 
     // Lấy chi tiết loại phòng và danh sách phòng có thể đặt (PUBLIC)
     @GetMapping("/{roomTypeId}/details")

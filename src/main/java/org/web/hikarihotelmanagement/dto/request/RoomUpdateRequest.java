@@ -4,7 +4,7 @@ import lombok.Data;
 import org.web.hikarihotelmanagement.enums.RoomStatus;
 
 @Data
-public class RoomRequest {
+public class RoomUpdateRequest {
     private String roomNumber;
     private Long roomTypeId;
     private String description;

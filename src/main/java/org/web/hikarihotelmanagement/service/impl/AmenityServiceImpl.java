@@ -17,32 +17,41 @@ import java.util.stream.Collectors;
 public class AmenityServiceImpl implements AmenityService {
 
     private final AmenityRepository amenityRepo;
+    private final AmenityMapper amenityMapper; // inject mapper
 
     @Override
     public AmenityResponse create(AmenityRequest req) {
         Amenity a = new Amenity();
         a.setName(req.getName());
         a.setDescription(req.getDescription());
-        amenityRepo.save(a);
-        return AmenityMapper.toResponse(a);
+        a = amenityRepo.save(a);
+        return amenityMapper.toResponse(a);
     }
 
     @Override
     public AmenityResponse update(Long id, AmenityRequest req) {
-        Amenity a = amenityRepo.findById(id).orElseThrow(() -> new RuntimeException("Not found"));
+        Amenity a = amenityRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Not found"));
+
         a.setName(req.getName());
         a.setDescription(req.getDescription());
-        return AmenityMapper.toResponse(a);
+        a = amenityRepo.save(a); // lưu lại sau khi update
+
+        return amenityMapper.toResponse(a);
     }
 
     @Override
     public AmenityResponse getById(Long id) {
-        Amenity a = amenityRepo.findById(id).orElseThrow(() -> new RuntimeException("Not found"));
-        return AmenityMapper.toResponse(a);
+        Amenity a = amenityRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Not found"));
+        return amenityMapper.toResponse(a);
     }
 
     @Override
     public List<AmenityResponse> getAll() {
-        return amenityRepo.findAll().stream().map(AmenityMapper::toResponse).collect(Collectors.toList());
+        return amenityRepo.findAll()
+                .stream()
+                .map(amenityMapper::toResponse) // dùng instance
+                .collect(Collectors.toList());
     }
 }
