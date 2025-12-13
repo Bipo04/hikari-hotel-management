@@ -18,6 +18,8 @@ public interface BookingService {
     // Admin methods
     List<BookingDetailResponse> getAllBookings();
     
+    List<BookingDetailResponse> getBookingsByUserId(Long userId);
+    
     BookingDetailResponse getBookingDetailAdmin(Long bookingId);
     
     void cancelBooking(Long bookingId);
