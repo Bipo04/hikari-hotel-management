@@ -2,11 +2,12 @@ package org.web.hikarihotelmanagement.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.web.hikarihotelmanagement.entity.RoomType;
+import org.web.hikarihotelmanagement.dto.request.RoomTypeRequest;
+import org.web.hikarihotelmanagement.entity.*;
 // Sửa: Xóa import cũ không còn tồn tại
 // import org.web.hikarihotelmanagement.mapper.RoomTypeMapper2;
 // Giữ lại import mapper đã đổi tên
-import org.web.hikarihotelmanagement.entity.RoomTypeImage;
+import org.web.hikarihotelmanagement.enums.RoomClass;
 import org.web.hikarihotelmanagement.mapper.RoomTypeMapper;
 import org.web.hikarihotelmanagement.repository.RoomTypeRepository;
 import org.web.hikarihotelmanagement.service.RoomTypeService;
@@ -15,11 +16,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.web.hikarihotelmanagement.dto.request.AvailableRoomTypeRequest;
 import org.web.hikarihotelmanagement.dto.response.AvailableRoomTypeResponse;
 import org.web.hikarihotelmanagement.dto.response.RoomTypeDetailResponse;
-import org.web.hikarihotelmanagement.entity.Amenity;
-import org.web.hikarihotelmanagement.entity.Room;
 import org.web.hikarihotelmanagement.exception.ApiException;
 import org.web.hikarihotelmanagement.repository.RoomRepository2;
-
+import org.web.hikarihotelmanagement.repository.AmenityRepository;
+import org.web.hikarihotelmanagement.repository.RoomTypeAmenityRepository;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -33,6 +33,9 @@ public class RoomTypeServiceImpl implements RoomTypeService {
 
     private final RoomTypeRepository roomTypeRepository;
     private final RoomRepository2 roomRepository2;
+    private final AmenityRepository amenityRepository;
+    private final RoomTypeAmenityRepository roomTypeAmenityRepository;
+
 
     // Đảm bảo tên biến này khớp với tên interface mới: RoomTypeMapper
     private final RoomTypeMapper roomTypeMapper;
@@ -52,20 +55,65 @@ public class RoomTypeServiceImpl implements RoomTypeService {
         return roomTypeRepository.findAll();
     }
 
-
+    @Transactional
     @Override
-    public RoomType updateRoomType(Long id, RoomType roomTypeDetails) {
+    public RoomType updateRoomType(Long id, RoomTypeRequest request) {
         RoomType existing = roomTypeRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy phòng với id: " + id));
 
-        existing.setName(roomTypeDetails.getName());
-        existing.setRoomClass(roomTypeDetails.getRoomClass());
-        existing.setDescription(roomTypeDetails.getDescription());
-        existing.setCapacity(roomTypeDetails.getCapacity());
-        existing.setPrice(roomTypeDetails.getPrice());
+        if (request.getName() != null) {
+            existing.setName(request.getName());
+        }
 
-        return roomTypeRepository.save(existing);
+        if (request.getRoomClass() != null) {
+            try {
+                existing.setRoomClass(RoomClass.valueOf(request.getRoomClass().trim().toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("roomClass không hợp lệ: " + request.getRoomClass());
+            }
+        }
+
+        if (request.getDescription() != null) {
+            existing.setDescription(request.getDescription());
+        }
+
+        if (request.getCapacity() != null) {
+            existing.setCapacity(request.getCapacity());
+        }
+
+        if (request.getPrice() != null) {
+            existing.setPrice(request.getPrice());
+        }
+
+        RoomType savedRoomType = roomTypeRepository.save(existing);
+
+        if (request.getAmenityIds() != null) {
+            roomTypeAmenityRepository.deleteByRoomTypeId(savedRoomType.getId());
+
+            if (!request.getAmenityIds().isEmpty()) {
+                List<Amenity> amenities = amenityRepository.findAllById(request.getAmenityIds());
+
+                if (amenities.size() != request.getAmenityIds().size()) {
+                    throw new IllegalArgumentException("Có amenityId không tồn tại");
+                }
+
+                List<RoomTypeAmenity> mappings = amenities.stream()
+                        .map(a -> {
+                            RoomTypeAmenity rta = new RoomTypeAmenity();
+                            rta.setRoomType(savedRoomType);
+                            rta.setAmenity(a);
+                            return rta;
+                        })
+                        .toList();
+
+                roomTypeAmenityRepository.saveAll(mappings);
+            }
+        }
+
+        return savedRoomType;
     }
+
+
 
 
     @Override
