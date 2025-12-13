@@ -12,7 +12,6 @@ import org.web.hikarihotelmanagement.entity.User;
 import org.web.hikarihotelmanagement.enums.Role;
 import org.web.hikarihotelmanagement.exception.ApiException;
 import org.web.hikarihotelmanagement.repository.UserRepository;
-import org.web.hikarihotelmanagement.service.EmailService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;

@@ -34,6 +34,12 @@ app.jwtSecret=your_secret_key
 app.jwtExpirationMs=time_expiration
 
 # ===============================================
+# Ngrok configuration
+# ===============================================
+
+app.ngrok.url=your_ngrok_url
+
+# ===============================================
 # Mail configuration (Gmail example)
 # ===============================================
 
@@ -43,6 +49,15 @@ spring.mail.username=your_email_username
 spring.mail.password=your_email_password
 spring.mail.properties.mail.smtp.auth=true
 spring.mail.properties.mail.smtp.starttls.enable=true
+
+# ===============================================
+# VNPay configuration
+# ===============================================
+
+vnpay.url=https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+vnpay.return-url=your_return_url
+vnpay.tmn-code=your_tmn-code
+vnpay.hash-secret=yout_hash-secret
 
 # ===============================================
 # Cloudflare R2 configuration
