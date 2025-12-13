@@ -38,6 +38,8 @@ public class VNPayServiceImpl implements VNPayService {
     private final RoomAvailabilityRequestRepository roomAvailabilityRequestRepository;
     private final CustomerTierService customerTierService;
 
+    private static final TimeZone VN_TIMEZONE = TimeZone.getTimeZone("Asia/Ho_Chi_Minh");
+
     @Override
     public String createPaymentUrl(Long bookingId, HttpServletRequest request) {
         Booking booking = bookingRepository.findById(bookingId)
@@ -47,7 +49,7 @@ public class VNPayServiceImpl implements VNPayService {
             throw new ApiException("Booking không ở trạng thái chờ thanh toán");
         }
 
-        long amount = booking.getAmount().longValue() * 100;
+        long amount = booking.getAmount().longValue() * 100; // VNPay nhân 100
 
         Map<String, String> vnpParams = new HashMap<>();
         vnpParams.put("vnp_Version", "2.1.0");
@@ -56,57 +58,59 @@ public class VNPayServiceImpl implements VNPayService {
         vnpParams.put("vnp_Amount", String.valueOf(amount));
         vnpParams.put("vnp_CurrCode", "VND");
         vnpParams.put("vnp_TxnRef", booking.getBookingCode());
-        vnpParams.put("vnp_OrderInfo", "Thanh toan booking: " + booking.getBookingCode());
+        vnpParams.put("vnp_OrderInfo", "Thanh toán booking: " + booking.getBookingCode());
         vnpParams.put("vnp_OrderType", "other");
         vnpParams.put("vnp_Locale", "vn");
         vnpParams.put("vnp_ReturnUrl", vnPayConfig.getVnpReturnUrl());
         vnpParams.put("vnp_IpAddr", getIpAddress(request));
 
-        Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
+        // --- Tạo thời gian theo GMT+7 ---
+        Calendar cld = Calendar.getInstance(VN_TIMEZONE);
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+        formatter.setTimeZone(VN_TIMEZONE);
+
         String vnpCreateDate = formatter.format(cld.getTime());
         vnpParams.put("vnp_CreateDate", vnpCreateDate);
 
-        cld.add(Calendar.MINUTE, 15);
+        cld.add(Calendar.MINUTE, 15); // Hết hạn sau 15 phút
         String vnpExpireDate = formatter.format(cld.getTime());
         vnpParams.put("vnp_ExpireDate", vnpExpireDate);
 
+        // --- Tạo query string và secure hash ---
         List<String> fieldNames = new ArrayList<>(vnpParams.keySet());
         Collections.sort(fieldNames);
+
         StringBuilder hashData = new StringBuilder();
         StringBuilder query = new StringBuilder();
-
         Iterator<String> itr = fieldNames.iterator();
+
         while (itr.hasNext()) {
             String fieldName = itr.next();
             String fieldValue = vnpParams.get(fieldName);
-            if ((fieldValue != null) && (fieldValue.length() > 0)) {
-                hashData.append(fieldName);
-                hashData.append('=');
-                try {
-                    hashData.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
-                    query.append(URLEncoder.encode(fieldName, StandardCharsets.US_ASCII.toString()));
-                    query.append('=');
-                    query.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                }
+            if (fieldValue != null && fieldValue.length() > 0) {
+                hashData.append(fieldName).append('=').append(encodeURIComponent(fieldValue));
+                query.append(encodeURIComponent(fieldName)).append('=').append(encodeURIComponent(fieldValue));
                 if (itr.hasNext()) {
-                    query.append('&');
                     hashData.append('&');
+                    query.append('&');
                 }
             }
         }
 
-        log.info("Hash data: {}", hashData.toString());
-
-        String queryUrl = query.toString();
         String vnpSecureHash = VNPayUtil.hmacSHA512(vnPayConfig.getVnpHashSecret(), hashData.toString());
-        queryUrl += "&vnp_SecureHash=" + vnpSecureHash;
+        query.append("&vnp_SecureHash=").append(vnpSecureHash);
 
-        log.info("Payment URL: {}", vnPayConfig.getVnpUrl() + "?" + queryUrl);
+        String paymentUrl = vnPayConfig.getVnpUrl() + "?" + query.toString();
+        log.info("Payment URL: {}", paymentUrl);
+        return paymentUrl;
+    }
 
-        return vnPayConfig.getVnpUrl() + "?" + queryUrl;
+    private String encodeURIComponent(String value) {
+        try {
+            return URLEncoder.encode(value, StandardCharsets.US_ASCII.toString());
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -116,7 +120,7 @@ public class VNPayServiceImpl implements VNPayService {
         for (Enumeration<String> params = request.getParameterNames(); params.hasMoreElements();) {
             String fieldName = params.nextElement();
             String fieldValue = request.getParameter(fieldName);
-            if ((fieldValue != null) && (fieldValue.length() > 0)) {
+            if (fieldValue != null && fieldValue.length() > 0) {
                 fields.put(fieldName, fieldValue);
             }
         }
@@ -125,38 +129,21 @@ public class VNPayServiceImpl implements VNPayService {
         fields.remove("vnp_SecureHashType");
         fields.remove("vnp_SecureHash");
 
-        log.info("VNPay callback fields: {}", fields);
-        log.info("VNPay SecureHash from callback: {}", vnpSecureHash);
-
+        // --- Xác thực chữ ký ---
         List<String> fieldNames = new ArrayList<>(fields.keySet());
         Collections.sort(fieldNames);
+
         StringBuilder hashData = new StringBuilder();
-        Iterator<String> itr = fieldNames.iterator();
-        while (itr.hasNext()) {
+        for (Iterator<String> itr = fieldNames.iterator(); itr.hasNext(); ) {
             String fieldName = itr.next();
             String fieldValue = fields.get(fieldName);
-            if ((fieldValue != null) && (fieldValue.length() > 0)) {
-                hashData.append(fieldName);
-                hashData.append('=');
-                try {
-                    hashData.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                }
-                if (itr.hasNext()) {
-                    hashData.append('&');
-                }
-            }
+            hashData.append(fieldName).append('=').append(encodeURIComponent(fieldValue));
+            if (itr.hasNext()) hashData.append('&');
         }
 
-        log.info("Hash data for callback: {}", hashData.toString());
-        log.info("Hash secret: {}", vnPayConfig.getVnpHashSecret());
-
         String signValue = VNPayUtil.hmacSHA512(vnPayConfig.getVnpHashSecret(), hashData.toString());
-        log.info("Generated SecureHash: {}", signValue);
 
         Map<String, String> result = new HashMap<>();
-
         if (signValue.equals(vnpSecureHash)) {
             String bookingCode = request.getParameter("vnp_TxnRef");
             String responseCode = request.getParameter("vnp_ResponseCode");
@@ -169,13 +156,11 @@ public class VNPayServiceImpl implements VNPayService {
                 bookingRepository.save(booking);
 
                 List<Request> requests = requestRepository.findByBookingId(booking.getId());
-
                 for (Request req : requests) {
                     req.setStatus(RequestStatus.PAYMENT_COMPLETED);
                 }
                 requestRepository.saveAll(requests);
 
-                // Cập nhật thống kê và hạng khách hàng
                 customerTierService.updateUserStatistics(booking.getUser().getId(), booking.getAmount());
 
                 result.put("status", "success");
@@ -184,7 +169,6 @@ public class VNPayServiceImpl implements VNPayService {
             } else {
                 booking.setStatus(BookingStatus.CANCELLED);
                 bookingRepository.save(booking);
-
                 unlockRooms(booking);
 
                 result.put("status", "failed");
@@ -202,10 +186,8 @@ public class VNPayServiceImpl implements VNPayService {
 
     private void unlockRooms(Booking booking) {
         List<Request> requests = requestRepository.findByBookingId(booking.getId());
-
         for (Request req : requests) {
             req.setStatus(RequestStatus.CANCELLED);
-
             roomAvailabilityRequestRepository.deleteByRequestId(req.getId());
 
             List<RoomAvailability> availabilities = roomAvailabilityRepository.findByRoomAndDateRange(
@@ -213,23 +195,18 @@ public class VNPayServiceImpl implements VNPayService {
                     req.getCheckIn().toLocalDate(),
                     req.getCheckOut().toLocalDate().minusDays(1)
             );
-
             for (RoomAvailability availability : availabilities) {
                 availability.setIsAvailable(true);
             }
-
             roomAvailabilityRepository.saveAll(availabilities);
         }
-
         requestRepository.saveAll(requests);
         log.info("Unlocked rooms for cancelled booking: {}", booking.getBookingCode());
     }
 
     private String getIpAddress(HttpServletRequest request) {
         String ipAddress = request.getHeader("X-FORWARDED-FOR");
-        if (ipAddress == null) {
-            ipAddress = request.getRemoteAddr();
-        }
+        if (ipAddress == null) ipAddress = request.getRemoteAddr();
         return ipAddress;
     }
 }

@@ -34,6 +34,14 @@ public class AdminBookingController {
         return ResponseEntity.ok(bookings);
     }
 
+    @GetMapping("/user/{userId}")
+    @Operation(summary = "Lấy danh sách đơn đặt phòng của một user",
+               description = "Trả về danh sách tất cả đơn đặt phòng của user theo userId")
+    public ResponseEntity<List<BookingDetailResponse>> getBookingsByUserId(@PathVariable Long userId) {
+        List<BookingDetailResponse> bookings = bookingService.getBookingsByUserId(userId);
+        return ResponseEntity.ok(bookings);
+    }
+
     @GetMapping("/{bookingId}")
     @Operation(summary = "Lấy chi tiết một đơn đặt phòng",
                description = "Trả về chi tiết đơn đặt phòng theo ID (không cần kiểm tra quyền sở hữu)")

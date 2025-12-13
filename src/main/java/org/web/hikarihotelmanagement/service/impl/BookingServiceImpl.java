@@ -264,6 +264,18 @@ public class BookingServiceImpl implements BookingService {
     }
     
     @Override
+    public List<BookingDetailResponse> getBookingsByUserId(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ApiException("Không tìm thấy người dùng"));
+        
+        List<Booking> bookings = bookingRepository.findByUserIdOrderByCreatedAtDesc(user.getId());
+
+        return bookings.stream()
+                .map(bookingMapper::toBookingDetailResponse)
+                .collect(Collectors.toList());
+    }
+    
+    @Override
     public BookingDetailResponse getBookingDetailAdmin(Long bookingId) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new ApiException("Không tìm thấy đơn đặt phòng"));
