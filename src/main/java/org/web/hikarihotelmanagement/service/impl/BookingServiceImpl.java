@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.web.hikarihotelmanagement.dto.request.CheckInRequest;
 import org.web.hikarihotelmanagement.dto.request.CreateBookingRequest;
 import org.web.hikarihotelmanagement.dto.request.RoomBookingRequest;
 import org.web.hikarihotelmanagement.dto.response.BookingDetailResponse;
@@ -44,6 +45,8 @@ public class BookingServiceImpl implements BookingService {
     private final RoomAvailabilityRequestRepository roomAvailabilityRequestRepository;
     private final VNPayService vnPayService;
     private final org.web.hikarihotelmanagement.mapper.BookingMapper bookingMapper;
+    private final org.web.hikarihotelmanagement.service.CustomerTierService customerTierService;
+    private final org.web.hikarihotelmanagement.repository.GuestRepository guestRepository;
 
     private void validateDates(LocalDate checkInDate, LocalDate checkOutDate) {
         LocalDate today = LocalDate.now();
@@ -248,5 +251,147 @@ public class BookingServiceImpl implements BookingService {
         }
 
         return bookingMapper.toBookingDetailResponse(booking);
+    }
+
+    // Admin methods
+    @Override
+    public List<BookingDetailResponse> getAllBookings() {
+        List<Booking> bookings = bookingRepository.findAll();
+        
+        return bookings.stream()
+                .map(bookingMapper::toBookingDetailResponse)
+                .collect(Collectors.toList());
+    }
+    
+    @Override
+    public BookingDetailResponse getBookingDetailAdmin(Long bookingId) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new ApiException("Không tìm thấy đơn đặt phòng"));
+        
+        return bookingMapper.toBookingDetailResponse(booking);
+    }
+    
+    @Override
+    @Transactional
+    public void cancelBooking(Long bookingId) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new ApiException("Không tìm thấy đơn đặt phòng"));
+        
+        // Kiểm tra trạng thái booking
+        if (booking.getStatus() == BookingStatus.CANCELLED) {
+            throw new ApiException("Đơn đặt phòng đã được hủy trước đó");
+        }
+        
+        // Kiểm tra xem có request nào đã check-in hoặc check-out chưa
+        boolean hasCheckedInOrOut = booking.getRequests().stream()
+                .anyMatch(req -> req.getStatus() == RequestStatus.CHECKED_IN || 
+                                 req.getStatus() == RequestStatus.CHECKED_OUT);
+        
+        if (hasCheckedInOrOut) {
+            throw new ApiException("Không thể hủy đơn đặt phòng khi đã có phòng check-in hoặc check-out");
+        }
+
+        // Nếu đã thanh toán thành công (PAYMENT_COMPLETED), trừ lại tiền và số đơn của user
+        if (booking.getStatus() == BookingStatus.PAYMENT_COMPLETED) {
+            User user = booking.getUser();
+
+            // Trừ tổng chi tiêu
+            BigDecimal currentSpent = user.getTotalSpent();
+            if (currentSpent != null && currentSpent.compareTo(booking.getAmount()) >= 0) {
+                user.setTotalSpent(currentSpent.subtract(booking.getAmount()));
+            } else {
+                user.setTotalSpent(BigDecimal.ZERO);
+            }
+
+            // Trừ số booking
+            Integer currentBookings = user.getTotalBookings();
+            if (currentBookings != null && currentBookings > 0) {
+                user.setTotalBookings(currentBookings - 1);
+            } else {
+                user.setTotalBookings(0);
+            }
+
+            userRepository.save(user);
+
+            // Cập nhật lại tier của user
+            customerTierService.updateCustomerTier(user);
+
+            log.info("Đã hoàn trả thống kê cho user {}: Trừ {} VND và 1 booking",
+                    user.getEmail(), booking.getAmount());
+        }
+        
+        // Cập nhật trạng thái booking
+        booking.setStatus(BookingStatus.CANCELLED);
+        bookingRepository.save(booking);
+        
+        // Cập nhật trạng thái các request
+        for (Request request : booking.getRequests()) {
+            request.setStatus(RequestStatus.CANCELLED);
+            requestRepository.save(request);
+            
+            // Mở lại phòng (set isAvailable = true cho các RoomAvailability)
+            List<RoomAvailabilityRequest> roomAvailabilityRequests = 
+                    roomAvailabilityRequestRepository.findByRequestId(request.getId());
+            
+            for (RoomAvailabilityRequest rar : roomAvailabilityRequests) {
+                RoomAvailability availability = rar.getRoomAvailability();
+                availability.setIsAvailable(true);
+                roomAvailabilityRepository.save(availability);
+            }
+            
+            // Xóa các RoomAvailabilityRequest
+            roomAvailabilityRequestRepository.deleteAll(roomAvailabilityRequests);
+        }
+        
+        log.info("Đã hủy booking {} với status {}", booking.getBookingCode(), booking.getStatus());
+    }
+    
+    @Override
+    @Transactional
+    public void checkInRequest(CheckInRequest request) {
+        Request requestEntity = requestRepository.findById(request.getRequestId())
+                .orElseThrow(() -> new ApiException("Không tìm thấy request"));
+        
+        // Kiểm tra trạng thái request
+        if (requestEntity.getStatus() != RequestStatus.PAYMENT_COMPLETED) {
+            throw new ApiException("Chỉ có thể check-in khi request đã thanh toán");
+        }
+        
+        // Cập nhật trạng thái
+        requestEntity.setStatus(RequestStatus.CHECKED_IN);
+        requestRepository.save(requestEntity);
+        
+        // Tạo danh sách guests
+        for (CheckInRequest.GuestInfo guestInfo : request.getGuests()) {
+            Guest guest = new Guest();
+            guest.setRequest(requestEntity);
+            guest.setFullName(guestInfo.getFullName());
+            guest.setIdentityType(guestInfo.getIdentityType());
+            guest.setIdentityNumber(guestInfo.getIdentityNumber());
+            guest.setIdentityIssuedDate(guestInfo.getIdentityIssuedDate());
+            guest.setIdentityIssuedPlace(guestInfo.getIdentityIssuedPlace());
+            
+            guestRepository.save(guest);
+        }
+        
+        log.info("Đã check-in request {} với {} khách", requestEntity.getId(), request.getGuests().size());
+    }
+    
+    @Override
+    @Transactional
+    public void checkOutRequest(Long requestId) {
+        Request request = requestRepository.findById(requestId)
+                .orElseThrow(() -> new ApiException("Không tìm thấy request"));
+        
+        // Kiểm tra trạng thái request
+        if (request.getStatus() != RequestStatus.CHECKED_IN) {
+            throw new ApiException("Chỉ có thể check-out khi request đã check-in");
+        }
+        
+        // Cập nhật trạng thái
+        request.setStatus(RequestStatus.CHECKED_OUT);
+        requestRepository.save(request);
+        
+        log.info("Đã check-out request {}", requestId);
     }
 }

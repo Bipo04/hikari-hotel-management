@@ -27,8 +27,8 @@ public class Review {
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "request_id", nullable = false)
-    private Request request;
+    @JoinColumn(name = "booking_id", nullable = false)
+    private Booking booking;
 
     private Integer rating;
 

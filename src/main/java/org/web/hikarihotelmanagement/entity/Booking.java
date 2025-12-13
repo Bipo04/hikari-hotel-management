@@ -57,4 +57,7 @@ public class Booking {
     // Relationships
     @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL)
     private List<Request> requests = new ArrayList<>();
+    
+    @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL)
+    private List<Review> reviews = new ArrayList<>();
 }
