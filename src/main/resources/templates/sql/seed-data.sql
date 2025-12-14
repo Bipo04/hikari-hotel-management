@@ -78,28 +78,28 @@ INSERT INTO room_types (name, class, description, capacity, price, created_at, u
 -- ===============================================
 INSERT INTO room_type_images (room_type_id, image_url, image_key, is_primary, created_at, updated_at) VALUES
 -- Phòng đơn Standard
-(1, 'https://pub-058f4a2577bd4b8780cec0486129191d.r2.dev/deb2a2e8-9426-4e8b-85f9-aa9056cbeaf3.jpeg', 'deb2a2e8-9426-4e8b-85f9-aa9056cbeaf3.jpeg', 1, NOW(), NOW()),
-(1, 'https://pub-058f4a2577bd4b8780cec0486129191d.r2.dev/deb2a2e8-9426-4e8b-85f9-aa9056cbeaf3.jpeg', 'deb2a2e8-9426-4e8b-85f9-aa9056cbeaf3.jpeg', 0, NOW(), NOW()),
+(1, 'https://pub-058f4a2577bd4b8780cec0486129191d.r2.dev/77b126ee-027f-404b-978c-646f21d4c6bb.jpg', 'deb2a2e8-9426-4e8b-85f9-aa9056cbeaf3.jpeg', 1, NOW(), NOW()),
+(1, 'https://pub-058f4a2577bd4b8780cec0486129191d.r2.dev/77b126ee-027f-404b-978c-646f21d4c6bb.jpg', 'deb2a2e8-9426-4e8b-85f9-aa9056cbeaf3.jpeg', 0, NOW(), NOW()),
 
 -- Phòng đôi Standard
-(2, 'https://pub-058f4a2577bd4b8780cec0486129191d.r2.dev/deb2a2e8-9426-4e8b-85f9-aa9056cbeaf3.jpeg', 'deb2a2e8-9426-4e8b-85f9-aa9056cbeaf3.jpeg', 1, NOW(), NOW()),
-(2, 'https://pub-058f4a2577bd4b8780cec0486129191d.r2.dev/deb2a2e8-9426-4e8b-85f9-aa9056cbeaf3.jpeg', 'deb2a2e8-9426-4e8b-85f9-aa9056cbeaf3.jpeg', 0, NOW(), NOW()),
+(2, 'https://pub-058f4a2577bd4b8780cec0486129191d.r2.dev/77b126ee-027f-404b-978c-646f21d4c6bb.jpg', 'deb2a2e8-9426-4e8b-85f9-aa9056cbeaf3.jpeg', 1, NOW(), NOW()),
+(2, 'https://pub-058f4a2577bd4b8780cec0486129191d.r2.dev/77b126ee-027f-404b-978c-646f21d4c6bb.jpg', 'deb2a2e8-9426-4e8b-85f9-aa9056cbeaf3.jpeg', 0, NOW(), NOW()),
 
 -- Phòng đơn Superior
-(3, 'https://pub-058f4a2577bd4b8780cec0486129191d.r2.dev/deb2a2e8-9426-4e8b-85f9-aa9056cbeaf3.jpeg', 'deb2a2e8-9426-4e8b-85f9-aa9056cbeaf3.jpeg', 1, NOW(), NOW()),
-(3, 'https://pub-058f4a2577bd4b8780cec0486129191d.r2.dev/deb2a2e8-9426-4e8b-85f9-aa9056cbeaf3.jpeg', 'deb2a2e8-9426-4e8b-85f9-aa9056cbeaf3.jpeg', 0, NOW(), NOW()),
+(3, 'https://pub-058f4a2577bd4b8780cec0486129191d.r2.dev/77b126ee-027f-404b-978c-646f21d4c6bb.jpg', 'deb2a2e8-9426-4e8b-85f9-aa9056cbeaf3.jpeg', 1, NOW(), NOW()),
+(3, 'https://pub-058f4a2577bd4b8780cec0486129191d.r2.dev/77b126ee-027f-404b-978c-646f21d4c6bb.jpg', 'deb2a2e8-9426-4e8b-85f9-aa9056cbeaf3.jpeg', 0, NOW(), NOW()),
 
 -- Phòng đôi Superior
-(4, 'https://pub-058f4a2577bd4b8780cec0486129191d.r2.dev/deb2a2e8-9426-4e8b-85f9-aa9056cbeaf3.jpeg', 'deb2a2e8-9426-4e8b-85f9-aa9056cbeaf3.jpeg', 1, NOW(), NOW()),
-(4, 'https://pub-058f4a2577bd4b8780cec0486129191d.r2.dev/deb2a2e8-9426-4e8b-85f9-aa9056cbeaf3.jpeg', 'deb2a2e8-9426-4e8b-85f9-aa9056cbeaf3.jpeg', 0, NOW(), NOW()),
+(4, 'https://pub-058f4a2577bd4b8780cec0486129191d.r2.dev/77b126ee-027f-404b-978c-646f21d4c6bb.jpg', 'deb2a2e8-9426-4e8b-85f9-aa9056cbeaf3.jpeg', 1, NOW(), NOW()),
+(4, 'https://pub-058f4a2577bd4b8780cec0486129191d.r2.dev/77b126ee-027f-404b-978c-646f21d4c6bb.jpg', 'deb2a2e8-9426-4e8b-85f9-aa9056cbeaf3.jpeg', 0, NOW(), NOW()),
 
 -- Phòng Business
-(5, 'https://pub-058f4a2577bd4b8780cec0486129191d.r2.dev/deb2a2e8-9426-4e8b-85f9-aa9056cbeaf3.jpeg', 'deb2a2e8-9426-4e8b-85f9-aa9056cbeaf3.jpeg', 1, NOW(), NOW()),
-(5, 'https://pub-058f4a2577bd4b8780cec0486129191d.r2.dev/deb2a2e8-9426-4e8b-85f9-aa9056cbeaf3.jpeg', 'deb2a2e8-9426-4e8b-85f9-aa9056cbeaf3.jpeg', 0, NOW(), NOW()),
+(5, 'https://pub-058f4a2577bd4b8780cec0486129191d.r2.dev/77b126ee-027f-404b-978c-646f21d4c6bb.jpg', 'deb2a2e8-9426-4e8b-85f9-aa9056cbeaf3.jpeg', 1, NOW(), NOW()),
+(5, 'https://pub-058f4a2577bd4b8780cec0486129191d.r2.dev/77b126ee-027f-404b-978c-646f21d4c6bb.jpg', 'deb2a2e8-9426-4e8b-85f9-aa9056cbeaf3.jpeg', 0, NOW(), NOW()),
 
 -- Suite gia đình
-(6, 'https://pub-058f4a2577bd4b8780cec0486129191d.r2.dev/deb2a2e8-9426-4e8b-85f9-aa9056cbeaf3.jpeg', 'deb2a2e8-9426-4e8b-85f9-aa9056cbeaf3.jpeg', 1, NOW(), NOW()),
-(6, 'https://pub-058f4a2577bd4b8780cec0486129191d.r2.dev/deb2a2e8-9426-4e8b-85f9-aa9056cbeaf3.jpeg', 'deb2a2e8-9426-4e8b-85f9-aa9056cbeaf3.jpeg', 0, NOW(), NOW());
+(6, 'https://pub-058f4a2577bd4b8780cec0486129191d.r2.dev/77b126ee-027f-404b-978c-646f21d4c6bb.jpg', 'deb2a2e8-9426-4e8b-85f9-aa9056cbeaf3.jpeg', 1, NOW(), NOW()),
+(6, 'https://pub-058f4a2577bd4b8780cec0486129191d.r2.dev/77b126ee-027f-404b-978c-646f21d4c6bb.jpg', 'deb2a2e8-9426-4e8b-85f9-aa9056cbeaf3.jpeg', 0, NOW(), NOW());
 
 -- ===============================================
 -- 4. ROOMS (48 phòng: 8 phòng đơn Standard, 8 phòng đôi Standard, 8 phòng đơn Superior, 8 phòng đôi Superior, 8 phòng Business, 8 Suite)
