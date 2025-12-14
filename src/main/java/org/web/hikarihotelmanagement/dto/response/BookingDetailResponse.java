@@ -14,6 +14,9 @@ public record BookingDetailResponse(
         @Schema(description = "ID đơn đặt", example = "1")
         Long id,
 
+        @Schema(description = "ID người đặt", example = "1")
+        Long userId,
+
         @Schema(description = "Mã đơn đặt", example = "BK1001")
         String bookingCode,
 
@@ -54,6 +57,9 @@ public record BookingDetailResponse(
 
             @Schema(description = "Trạng thái request", example = "CONFIRMED")
             String status,
+
+            @Schema(description = "Lưu ý")
+            String note,
 
             @Schema(description = "Danh sách khách (chỉ có khi đã check-in hoặc check-out)")
             List<GuestResponse> guestList
