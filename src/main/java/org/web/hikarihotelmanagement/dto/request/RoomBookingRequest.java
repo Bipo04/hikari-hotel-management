@@ -30,6 +30,4 @@ public class RoomBookingRequest {
     @NotNull(message = "Số lượng khách không được để trống")
     @Min(value = 1, message = "Số lượng khách phải ít nhất là 1")
     private Integer numberOfGuests;
-    
-    private String note; // Ghi chú cho phòng này
 }

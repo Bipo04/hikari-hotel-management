@@ -24,4 +24,5 @@ public class BookingResponse {
     private List<BookingRoomResponse> rooms;
     private LocalDateTime createdAt;
     private String paymentUrl;
+    private Integer discount;
 }

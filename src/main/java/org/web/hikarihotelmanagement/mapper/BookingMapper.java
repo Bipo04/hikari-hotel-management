@@ -17,6 +17,7 @@ public interface BookingMapper {
     @Mapping(target = "price", source = "amount")
     @Mapping(target = "bookingDate", source = "createdAt")
     @Mapping(target = "userId", source = "user.id")
+    @Mapping(target = "bookingNote", source = "note")
     BookingDetailResponse toBookingDetailResponse(Booking booking);
     
     @Mapping(target = "roomNumber", source = "room.roomNumber")

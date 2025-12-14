@@ -11,20 +11,18 @@ import org.web.hikarihotelmanagement.dto.request.RoomBookingRequest;
 import org.web.hikarihotelmanagement.dto.response.BookingDetailResponse;
 import org.web.hikarihotelmanagement.dto.response.BookingResponse;
 import org.web.hikarihotelmanagement.dto.response.BookingRoomResponse;
+import org.web.hikarihotelmanagement.dto.response.CustomerTierDetailResponse;
 import org.web.hikarihotelmanagement.entity.*;
 import org.web.hikarihotelmanagement.enums.BookingStatus;
 import org.web.hikarihotelmanagement.enums.RequestStatus;
 import org.web.hikarihotelmanagement.exception.ApiException;
-import org.web.hikarihotelmanagement.repository.BookingRepository;
-import org.web.hikarihotelmanagement.repository.RequestRepository;
-import org.web.hikarihotelmanagement.repository.RoomAvailabilityRepository;
-import org.web.hikarihotelmanagement.repository.RoomAvailabilityRequestRepository;
-import org.web.hikarihotelmanagement.repository.RoomRepository;
-import org.web.hikarihotelmanagement.repository.UserRepository;
+import org.web.hikarihotelmanagement.mapper.BookingMapper;
+import org.web.hikarihotelmanagement.repository.*;
 import org.web.hikarihotelmanagement.service.BookingService;
 import org.web.hikarihotelmanagement.service.VNPayService;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -44,9 +42,9 @@ public class BookingServiceImpl implements BookingService {
     private final RoomAvailabilityRepository roomAvailabilityRepository;
     private final RoomAvailabilityRequestRepository roomAvailabilityRequestRepository;
     private final VNPayService vnPayService;
-    private final org.web.hikarihotelmanagement.mapper.BookingMapper bookingMapper;
-    private final org.web.hikarihotelmanagement.service.CustomerTierService customerTierService;
-    private final org.web.hikarihotelmanagement.repository.GuestRepository guestRepository;
+    private final BookingMapper bookingMapper;
+    private final CustomerTierServiceImpl customerTierService;
+    private final GuestRepository guestRepository;
 
     private void validateDates(LocalDate checkInDate, LocalDate checkOutDate) {
         LocalDate today = LocalDate.now();
@@ -76,6 +74,7 @@ public class BookingServiceImpl implements BookingService {
         booking.setStatus(BookingStatus.PAYMENT_PENDING);
         booking.setPaymentMethod(request.getPaymentMethod());
         booking.setAmount(BigDecimal.ZERO);
+        booking.setNote(request.getBookingNote());
 
         booking = bookingRepository.save(booking);
 
@@ -103,7 +102,6 @@ public class BookingServiceImpl implements BookingService {
             newRequest.setCheckOut(roomReq.getCheckOutDate().atTime(12, 0));
             newRequest.setNumberOfGuests(roomReq.getNumberOfGuests());
             newRequest.setStatus(RequestStatus.PAYMENT_PENDING);
-            newRequest.setNote(roomReq.getNote());
 
             requests.add(newRequest);
 
@@ -119,10 +117,17 @@ public class BookingServiceImpl implements BookingService {
             updateRoomAvailability(savedRequest, roomReq.getCheckInDate(), roomReq.getCheckOutDate());
         }
 
-        booking.setAmount(totalAmount);
+        CustomerTierDetailResponse customerTier = customerTierService.getCurrentUserTier(userEmail);
+        int discount = customerTier.getDiscountPercent();
+        
+        BigDecimal discountAmount = totalAmount
+                .multiply(BigDecimal.valueOf(100 - discount))
+                .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+        
+        booking.setAmount(discountAmount);
         booking = bookingRepository.save(booking);
 
-        return buildBookingResponse(booking, requests, httpRequest);
+        return buildBookingResponse(booking, requests, discount, httpRequest);
     }
 
     private boolean isRoomAvailable(Room room, LocalDate checkInDate, LocalDate checkOutDate) {
@@ -192,7 +197,7 @@ public class BookingServiceImpl implements BookingService {
         return code.toString();
     }
 
-    private BookingResponse buildBookingResponse(Booking booking, List<Request> requests, HttpServletRequest httpRequest) {
+    private BookingResponse buildBookingResponse(Booking booking, List<Request> requests,int discount, HttpServletRequest httpRequest) {
         BookingResponse response = new BookingResponse();
         response.setBookingId(booking.getId());
         response.setBookingCode(booking.getBookingCode());
@@ -200,6 +205,8 @@ public class BookingServiceImpl implements BookingService {
         response.setPaymentMethod(booking.getPaymentMethod());
         response.setAmount(booking.getAmount());
         response.setCreatedAt(booking.getCreatedAt());
+        response.setBookingNote(booking.getNote());
+        response.setDiscount(discount);
 
         if ("VNPAY".equalsIgnoreCase(booking.getPaymentMethod())) {
             String paymentUrl = vnPayService.createPaymentUrl(booking.getId(), httpRequest);
@@ -215,7 +222,6 @@ public class BookingServiceImpl implements BookingService {
                     roomResp.setCheckInDate(req.getCheckIn().toLocalDate());
                     roomResp.setCheckOutDate(req.getCheckOut().toLocalDate());
                     roomResp.setNumberOfGuests(req.getNumberOfGuests());
-                    roomResp.setNote(req.getNote());
                     return roomResp;
                 })
                 .collect(Collectors.toList());
@@ -339,6 +345,7 @@ public class BookingServiceImpl implements BookingService {
         // Cập nhật trạng thái các request
         for (Request request : booking.getRequests()) {
             request.setStatus(RequestStatus.CANCELLED);
+;
             requestRepository.save(request);
             
             // Mở lại phòng (set isAvailable = true cho các RoomAvailability)

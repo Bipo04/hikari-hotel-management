@@ -8,9 +8,11 @@ import org.web.hikarihotelmanagement.dto.request.RegisterRequest;
 import org.web.hikarihotelmanagement.dto.request.ResendOtpRequest;
 import org.web.hikarihotelmanagement.dto.request.VerifyOtpRequest;
 import org.web.hikarihotelmanagement.dto.response.AuthenticationResponse;
+import org.web.hikarihotelmanagement.entity.CustomerTier;
 import org.web.hikarihotelmanagement.entity.User;
 import org.web.hikarihotelmanagement.enums.Role;
 import org.web.hikarihotelmanagement.exception.ApiException;
+import org.web.hikarihotelmanagement.repository.CustomerTierRepository;
 import org.web.hikarihotelmanagement.repository.UserRepository;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -29,6 +31,7 @@ public class AuthenticationService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final EmailService emailService;
+    private final CustomerTierRepository customerTierRepository;
 
     public String register(RegisterRequest request) {
         log.info("Bắt đầu đăng ký cho email: {}", request.email());
@@ -38,6 +41,8 @@ public class AuthenticationService {
             throw new ApiException("Email đã tồn tại: " + request.email());
         }
 
+        CustomerTier customerTier = customerTierRepository.findAllByOrderByTierOrderAsc().get(0);
+
         User user = new User();
         user.setEmail(request.email());
         user.setPassword(passwordEncoder.encode(request.password()));
@@ -45,6 +50,7 @@ public class AuthenticationService {
         user.setPhone(request.phone());
         user.setBirthDate(request.birthDate());
         user.setRole(Role.USER);
+        user.setCustomerTier(customerTier);
         user.setStatus(false);
         user.setIsVerified(false);
 

@@ -35,6 +35,9 @@ public record BookingDetailResponse(
         @Schema(description = "Trạng thái đơn đặt", example = "CONFIRMED")
         BookingStatus status,
 
+        @Schema(description = "Ghi chú đơn đặt")
+        String bookingNote,
+
         @Schema(description = "Ngày đặt")
         LocalDateTime bookingDate
 ) {
@@ -57,9 +60,6 @@ public record BookingDetailResponse(
 
             @Schema(description = "Trạng thái request", example = "CONFIRMED")
             String status,
-
-            @Schema(description = "Lưu ý")
-            String note,
 
             @Schema(description = "Danh sách khách (chỉ có khi đã check-in hoặc check-out)")
             List<GuestResponse> guestList

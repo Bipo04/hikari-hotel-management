@@ -18,5 +18,4 @@ public class BookingRoomResponse {
     private LocalDate checkInDate;
     private LocalDate checkOutDate;
     private Integer numberOfGuests;
-    private String note;
 }

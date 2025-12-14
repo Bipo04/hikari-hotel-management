@@ -58,4 +58,15 @@ public interface RoomAvailabilityRepository extends JpaRepository<RoomAvailabili
             @Param("from") LocalDate from,
             @Param("to") LocalDate to
     );
+    
+    @Query("DELETE FROM RoomAvailability ra " +
+           "WHERE ra.availableDate < :beforeDate " +
+           "AND ra.isAvailable = true " +
+           "AND SIZE(ra.roomAvailabilityRequests) = 0")
+    void deleteUnbookedAvailabilitiesBeforeDate(@Param("beforeDate") LocalDate beforeDate);
+    
+    @Query("SELECT DISTINCT ra.room FROM RoomAvailability ra")
+    List<org.web.hikarihotelmanagement.entity.Room> findAllRoomsWithAvailabilities();
+    
+    boolean existsByRoomIdAndAvailableDate(Long roomId, LocalDate availableDate);
 }
