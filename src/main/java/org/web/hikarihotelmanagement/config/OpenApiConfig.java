@@ -16,7 +16,7 @@ import java.util.List;
 @Configuration
 public class OpenApiConfig {
 
-    @Value("${app.ngrok.url:}")
+    @Value("${spring.domain.name:}")
     private String ngrokUrl;
 
     @Bean
@@ -25,13 +25,11 @@ public class OpenApiConfig {
         
         if (ngrokUrl != null && !ngrokUrl.isEmpty()) {
             servers.add(new Server()
-                    .url(ngrokUrl)
-                    .description("Production Server (ngrok)"));
+                    .url(ngrokUrl));
         }
 
         servers.add(new Server()
-                .url("http://localhost:8080")
-                .description("Local Development Server"));
+                .url("http://localhost:8080"));
 
         return new OpenAPI()
                 .info(new Info()

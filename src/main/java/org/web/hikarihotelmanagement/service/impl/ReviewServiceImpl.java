@@ -7,15 +7,19 @@ import org.springframework.transaction.annotation.Transactional;
 import org.web.hikarihotelmanagement.dto.request.CreateReviewRequest;
 import org.web.hikarihotelmanagement.dto.response.ReviewResponse;
 import org.web.hikarihotelmanagement.entity.Booking;
-import org.web.hikarihotelmanagement.entity.Request;
 import org.web.hikarihotelmanagement.entity.Review;
+import org.web.hikarihotelmanagement.entity.RoomType;
 import org.web.hikarihotelmanagement.entity.User;
 import org.web.hikarihotelmanagement.enums.RequestStatus;
 import org.web.hikarihotelmanagement.exception.ApiException;
 import org.web.hikarihotelmanagement.repository.BookingRepository;
 import org.web.hikarihotelmanagement.repository.ReviewRepository;
+import org.web.hikarihotelmanagement.repository.RoomTypeRepository;
 import org.web.hikarihotelmanagement.repository.UserRepository;
 import org.web.hikarihotelmanagement.service.ReviewService;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +29,7 @@ public class ReviewServiceImpl implements ReviewService {
     private final ReviewRepository reviewRepository;
     private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
+    private final RoomTypeRepository roomTypeRepository;
     private final org.web.hikarihotelmanagement.mapper.ReviewMapper reviewMapper;
 
     @Override
@@ -63,9 +68,34 @@ public class ReviewServiceImpl implements ReviewService {
 
         review = reviewRepository.save(review);
 
-        log.info("User {} đã đánh giá booking {} với {} sao", 
+        log.info("User {} đã đánh giá booking {} với {} sao",
                 user.getEmail(), booking.getBookingCode(), request.getRating());
 
         return reviewMapper.toReviewResponse(review);
+    }
+
+    @Override
+    public List<ReviewResponse> getReviewsByUser(String userEmail) {
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ApiException("Đây là danh sách review của bạn"));
+
+        List<Review> reviews = reviewRepository.findByUserOrderByCreatedAtDesc(user);
+
+        return reviews.stream()
+                .map(reviewMapper::toReviewResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ReviewResponse> getReviewsByRoomType(Long roomTypeId) {
+        // Kiểm tra room type có tồn tại không
+        RoomType roomType = roomTypeRepository.findById(roomTypeId)
+                .orElseThrow(() -> new ApiException("Không tìm thấy loại phòng"));
+
+        List<Review> reviews = reviewRepository.findByRoomTypeId(roomTypeId);
+
+        return reviews.stream()
+                .map(reviewMapper::toReviewResponse)
+                .collect(Collectors.toList());
     }
 }
