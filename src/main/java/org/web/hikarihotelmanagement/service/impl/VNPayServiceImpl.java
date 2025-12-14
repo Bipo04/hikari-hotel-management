@@ -151,6 +151,17 @@ public class VNPayServiceImpl implements VNPayService {
             Booking booking = bookingRepository.findByBookingCode(bookingCode)
                     .orElseThrow(() -> new ApiException("Không tìm thấy booking"));
 
+            // Kiểm tra idempotency - nếu đã xử lý callback rồi thì không xử lý nữa
+            if (booking.getStatus() != BookingStatus.PAYMENT_PENDING) {
+                log.warn("Callback đã được xử lý trước đó cho booking: {}. Trạng thái hiện tại: {}", 
+                         bookingCode, booking.getStatus());
+                result.put("status", "already_processed");
+                result.put("message", "Callback đã được xử lý trước đó");
+                result.put("bookingCode", bookingCode);
+                result.put("currentStatus", booking.getStatus().name());
+                return result;
+            }
+
             if ("00".equals(responseCode)) {
                 booking.setStatus(BookingStatus.PAYMENT_COMPLETED);
                 bookingRepository.save(booking);
@@ -163,6 +174,7 @@ public class VNPayServiceImpl implements VNPayService {
 
                 customerTierService.updateUserStatistics(booking.getUser().getId(), booking.getAmount());
 
+                log.info("Thanh toán thành công cho booking: {}", bookingCode);
                 result.put("status", "success");
                 result.put("message", "Thanh toán thành công");
                 result.put("bookingCode", bookingCode);
@@ -171,6 +183,7 @@ public class VNPayServiceImpl implements VNPayService {
                 bookingRepository.save(booking);
                 unlockRooms(booking);
 
+                log.info("Thanh toán thất bại cho booking: {}. Response code: {}", bookingCode, responseCode);
                 result.put("status", "failed");
                 result.put("message", "Thanh toán thất bại");
                 result.put("bookingCode", bookingCode);

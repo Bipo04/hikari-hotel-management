@@ -46,6 +46,8 @@ public class Booking {
     @Column(name = "decline_reason")
     private String declineReason;
 
+    private String note;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

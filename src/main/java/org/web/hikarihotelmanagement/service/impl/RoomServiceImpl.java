@@ -1,6 +1,7 @@
 package org.web.hikarihotelmanagement.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.web.hikarihotelmanagement.dto.request.RoomCreateRequest;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class RoomServiceImpl implements RoomService {
 
     private final RoomRepository roomRepository;
@@ -35,6 +37,7 @@ public class RoomServiceImpl implements RoomService {
     private final RoomAvailabilityRepository roomAvailabilityRepository;
 
     @Override
+    @Transactional
     public RoomResponse create(RoomCreateRequest req) {
 
         if (roomRepository.existsByRoomNumber(req.getRoomNumber())) {
@@ -50,7 +53,12 @@ public class RoomServiceImpl implements RoomService {
         room.setDescription(req.getDescription());
         room.setStatus(req.getStatus());
 
-        roomRepository.save(room);
+        room = roomRepository.save(room);
+        
+        // Tạo 3 tháng availability cho room mới
+        createAvailabilitiesForRoom(room, 3);
+        log.info("Tạo room mới {} với 3 tháng availability", room.getRoomNumber());
+        
         return mapToResponse(room);
     }
 
@@ -106,6 +114,28 @@ public class RoomServiceImpl implements RoomService {
                 .orElseThrow(() -> new ApiException("Không tìm thấy Room với id = " + id));
 
         roomRepository.delete(room);
+    }
+
+    @Override
+    @Transactional
+    public void createAvailabilitiesForRoom(Room room, int months) {
+        // Lấy ngày đầu tiên của tháng hiện tại
+        LocalDate startDate = LocalDate.now().withDayOfMonth(1);
+        LocalDate endDate = startDate.plusMonths(months);
+        
+        List<RoomAvailability> availabilities = new ArrayList<>();
+        
+        for (LocalDate date = startDate; date.isBefore(endDate); date = date.plusDays(1)) {
+            RoomAvailability availability = new RoomAvailability();
+            availability.setRoom(room);
+            availability.setAvailableDate(date);
+            availability.setPrice(room.getRoomType().getPrice());
+            availability.setIsAvailable(true);
+            availabilities.add(availability);
+        }
+        
+        roomAvailabilityRepository.saveAll(availabilities);
+        log.info("Tạo {} ngày availability cho room {} (từ ngày đầu tháng)", availabilities.size(), room.getRoomNumber());
     }
 
     private RoomResponse mapToResponse(Room room) {
