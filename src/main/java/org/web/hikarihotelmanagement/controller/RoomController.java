@@ -9,9 +9,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.web.hikarihotelmanagement.dto.request.RoomCreateRequest;
 import org.web.hikarihotelmanagement.dto.request.RoomUpdateRequest;
+import org.web.hikarihotelmanagement.dto.response.RoomAvailabilityCalendarResponse;
 import org.web.hikarihotelmanagement.dto.response.RoomResponse;
 import org.web.hikarihotelmanagement.service.RoomService;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -50,5 +52,14 @@ public class RoomController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         roomService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/calendar")
+    public ResponseEntity<List<RoomAvailabilityCalendarResponse>> getRoomCalendar(
+            @PathVariable Long id,
+            @RequestParam LocalDate from,
+            @RequestParam LocalDate to
+    ) {
+        return ResponseEntity.ok(roomService.getRoomCalendar(id, from, to));
     }
 }

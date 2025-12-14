@@ -3,7 +3,10 @@ package org.web.hikarihotelmanagement.service;
 import org.web.hikarihotelmanagement.dto.request.RoomCreateRequest;
 import org.web.hikarihotelmanagement.dto.request.RoomUpdateRequest;
 import org.web.hikarihotelmanagement.dto.response.RoomResponse;
+import org.web.hikarihotelmanagement.dto.response.RoomAvailabilityCalendarResponse;
 
+
+import java.time.LocalDate;
 import java.util.List;
 
 public interface RoomService {
@@ -17,4 +20,6 @@ public interface RoomService {
     RoomResponse update(Long id, RoomUpdateRequest req);
 
     void delete(Long id);
+
+    List<RoomAvailabilityCalendarResponse> getRoomCalendar(Long roomId, LocalDate from, LocalDate to);
 }
