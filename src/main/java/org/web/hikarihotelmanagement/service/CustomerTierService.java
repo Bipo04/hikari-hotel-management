@@ -9,7 +9,12 @@ import java.util.List;
 
 public interface CustomerTierService {
     List<CustomerTierDetailResponse> getAllTiers();
+    
+    List<CustomerTierDetailResponse> getAllActiveTiers();
+    
     CustomerTierDetailResponse getTierById(Long id);
+    
+    CustomerTierDetailResponse getCurrentUserTier(String userEmail);
     CustomerTierDetailResponse createTier(CustomerTierRequest request);
     CustomerTierDetailResponse updateTier(Long id, CustomerTierRequest request);
     void deleteTier(Long id);

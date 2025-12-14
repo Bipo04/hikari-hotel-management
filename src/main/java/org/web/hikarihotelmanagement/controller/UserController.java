@@ -12,10 +12,9 @@ import org.web.hikarihotelmanagement.dto.request.ChangePasswordRequest;
 import org.web.hikarihotelmanagement.dto.request.CreateReviewRequest;
 import org.web.hikarihotelmanagement.dto.request.UpdateProfileRequest;
 import org.web.hikarihotelmanagement.dto.response.BookingDetailResponse;
+import org.web.hikarihotelmanagement.dto.response.CustomerTierDetailResponse;
 import org.web.hikarihotelmanagement.dto.response.ReviewResponse;
 import org.web.hikarihotelmanagement.dto.response.UserResponse;
-import org.web.hikarihotelmanagement.entity.User;
-import org.web.hikarihotelmanagement.repository.UserRepository;
 import org.web.hikarihotelmanagement.service.BookingService;
 import org.web.hikarihotelmanagement.service.CustomerTierService;
 import org.web.hikarihotelmanagement.service.ReviewService;
@@ -34,7 +33,6 @@ public class UserController {
 
     private final UserService userService;
     private final CustomerTierService customerTierService;
-    private final UserRepository userRepository;
     private final BookingService bookingService;
     private final ReviewService reviewService;
 
@@ -103,5 +101,27 @@ public class UserController {
         String email = authentication.getName();
         ReviewResponse review = reviewService.createReview(request, email);
         return ResponseEntity.ok(review);
+    }
+    
+    @GetMapping("/tier/current")
+    @Operation(summary = "Lấy hạng hiện tại của người dùng",
+               description = "Trả về thông tin hạng khách hàng hiện tại của user đang đăng nhập")
+    public ResponseEntity<CustomerTierDetailResponse> getCurrentTier(Authentication authentication) {
+        String email = authentication.getName();
+        CustomerTierDetailResponse tierResponse = customerTierService.getCurrentUserTier(email);
+        
+        if (tierResponse == null) {
+            return ResponseEntity.noContent().build();
+        }
+        
+        return ResponseEntity.ok(tierResponse);
+    }
+    
+    @GetMapping("/tier/all")
+    @Operation(summary = "Xem tất cả các hạng khách hàng",
+               description = "Trả về danh sách tất cả các hạng khách hàng đang hoạt động, sắp xếp theo thứ tự hạng")
+    public ResponseEntity<List<CustomerTierDetailResponse>> getAllTiers() {
+        List<CustomerTierDetailResponse> tiers = customerTierService.getAllActiveTiers();
+        return ResponseEntity.ok(tiers);
     }
 }

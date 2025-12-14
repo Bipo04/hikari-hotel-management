@@ -37,10 +37,30 @@ public class CustomerTierServiceImpl implements CustomerTierService {
     }
 
     @Override
+    public List<CustomerTierDetailResponse> getAllActiveTiers() {
+        return customerTierRepository.findByActiveTrueOrderByTierOrderAsc()
+                .stream()
+                .map(customerTierMapper::toDetailResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public CustomerTierDetailResponse getTierById(Long id) {
         CustomerTier tier = customerTierRepository.findById(id)
                 .orElseThrow(() -> new ApiException("Không tìm thấy hạng khách hàng với ID: " + id));
         return customerTierMapper.toDetailResponse(tier);
+    }
+
+    @Override
+    public CustomerTierDetailResponse getCurrentUserTier(String userEmail) {
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ApiException("Không tìm thấy người dùng"));
+        
+        if (user.getCustomerTier() == null) {
+            return null;
+        }
+        
+        return customerTierMapper.toDetailResponse(user.getCustomerTier());
     }
 
     @Override
