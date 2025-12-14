@@ -24,10 +24,10 @@ public class EmailService {
     @Autowired
     private SpringTemplateEngine templateEngine;
 
-    @Value("${spring.mail.sender:no-reply@hikarihotel.com}")
+    @Value("${spring.mail.sender}")
     private String emailFrom;
 
-    @Value("${spring.domain.name:http://localhost:8080}")
+    @Value("${spring.domain.name}")
     private String websiteUrl;
 
     @Async
