@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.web.hikarihotelmanagement.dto.response.RoomAvailabilityBookingInfoDto;
 import org.web.hikarihotelmanagement.entity.RoomAvailability;
 
 import java.time.LocalDate;
@@ -36,4 +37,25 @@ public interface RoomAvailabilityRepository extends JpaRepository<RoomAvailabili
     List<RoomAvailability> findByRoomAndDateRange(@Param("roomId") Long roomId,
                                                    @Param("checkInDate") LocalDate checkInDate,
                                                    @Param("checkOutDate") LocalDate checkOutDate);
+
+    @Query("""
+        SELECT new org.web.hikarihotelmanagement.dto.response.RoomAvailabilityBookingInfoDto(
+            ra.availableDate,
+            b.id,
+            b.bookingCode
+        )
+        FROM RoomAvailability ra
+        JOIN ra.roomAvailabilityRequests rar
+        JOIN rar.request req
+        JOIN req.booking b
+        WHERE ra.room.id = :roomId
+          AND ra.availableDate BETWEEN :from AND :to
+          AND ra.isAvailable = false
+        ORDER BY ra.availableDate
+    """)
+    List<RoomAvailabilityBookingInfoDto> findBookingInfoForUnavailableDates(
+            @Param("roomId") Long roomId,
+            @Param("from") LocalDate from,
+            @Param("to") LocalDate to
+    );
 }
