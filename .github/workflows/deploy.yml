@@ -1,0 +1,39 @@
+name: Deploy Spring Boot to VPS
+
+on:
+  push:
+    branches:
+      - main  # hoặc branch bạn muốn deploy
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 2. Build Spring Boot jar
+      - name: Build JAR
+        run: ./mvnw clean package -DskipTests
+
+      # 3. Copy jar + env file to VPS via SSH
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            APP_DIR=/opt/app
+            mkdir -p $APP_DIR
+            cp $GITHUB_WORKSPACE/target/app.jar $APP_DIR/app.jar
+            # Nếu có file env mới:
+            # cp $GITHUB_WORKSPACE/deploy/app.env $APP_DIR/app.env
+            sudo chown deploy:deploy $APP_DIR/app.jar
+            sudo chmod 500 $APP_DIR/app.jar
+            # Reload và restart service
+            sudo systemctl daemon-reload
+            sudo systemctl restart myapp.service
+            sudo systemctl status myapp.service --no-pager
