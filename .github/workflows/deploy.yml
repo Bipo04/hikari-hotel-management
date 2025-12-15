@@ -1,9 +1,9 @@
-name: Deploy Spring Boot to VPS
+name: CI/CD Spring Boot to VPS
 
 on:
   push:
     branches:
-      - main  # hoặc branch bạn muốn deploy
+      - main  # branch deploy
 
 jobs:
   build-and-deploy:
@@ -14,11 +14,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 2. Build Spring Boot jar
+      # 2. Make mvnw executable
+      - name: Make mvnw executable
+        run: chmod +x ./mvnw
+
+      # 3. Setup Java 21
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      # 4. Build jar
       - name: Build JAR
         run: ./mvnw clean package -DskipTests
 
-      # 3. Copy jar + env file to VPS via SSH
+      # 5. Deploy to VPS
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v1
         with:
@@ -28,12 +39,18 @@ jobs:
           script: |
             APP_DIR=/opt/app
             mkdir -p $APP_DIR
+            
+            # Copy jar
             cp $GITHUB_WORKSPACE/target/app.jar $APP_DIR/app.jar
-            # Nếu có file env mới:
-            # cp $GITHUB_WORKSPACE/deploy/app.env $APP_DIR/app.env
             sudo chown deploy:deploy $APP_DIR/app.jar
             sudo chmod 500 $APP_DIR/app.jar
-            # Reload và restart service
+            
+            # Copy env file nếu cần (tùy bạn)
+            # cp $GITHUB_WORKSPACE/deploy/app.env $APP_DIR/app.env
+            # sudo chown deploy:deploy $APP_DIR/app.env
+            # sudo chmod 600 $APP_DIR/app.env
+            
+            # Reload systemd và restart service
             sudo systemctl daemon-reload
             sudo systemctl restart myapp.service
             sudo systemctl status myapp.service --no-pager
