@@ -56,6 +56,7 @@ public class ScheduledTasks {
             
             for (Booking booking : expiredBookings) {
                 booking.setStatus(BookingStatus.CANCELLED);
+                booking.setPaymentUrl(null);
                 unlockRooms(booking);
                 bookingRepository.save(booking);
                 log.info("Số đơn quá hạn đã hủy: {}", booking.getBookingCode());

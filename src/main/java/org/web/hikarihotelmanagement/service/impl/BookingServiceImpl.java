@@ -340,6 +340,7 @@ public class BookingServiceImpl implements BookingService {
         
         // Cập nhật trạng thái booking
         booking.setStatus(BookingStatus.CANCELLED);
+        booking.setPaymentUrl(null);
         bookingRepository.save(booking);
         
         // Cập nhật trạng thái các request

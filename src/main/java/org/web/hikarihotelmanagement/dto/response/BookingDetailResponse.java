@@ -32,6 +32,9 @@ public record BookingDetailResponse(
         @Schema(description = "Tổng tiền", example = "5000000")
         BigDecimal price,
 
+        @Schema(description = "Link thanh toán")
+        String paymentUrl,
+
         @Schema(description = "Trạng thái đơn đặt", example = "CONFIRMED")
         BookingStatus status,
 
