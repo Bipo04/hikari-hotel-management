@@ -102,6 +102,7 @@ public class VNPayServiceImpl implements VNPayService {
 
         String paymentUrl = vnPayConfig.getVnpUrl() + "?" + query.toString();
         log.info("Payment URL: {}", paymentUrl);
+        booking.setPaymentUrl(paymentUrl);
         return paymentUrl;
     }
 
@@ -164,6 +165,7 @@ public class VNPayServiceImpl implements VNPayService {
 
             if ("00".equals(responseCode)) {
                 booking.setStatus(BookingStatus.PAYMENT_COMPLETED);
+                booking.setPaymentUrl(null);
                 bookingRepository.save(booking);
 
                 List<Request> requests = requestRepository.findByBookingId(booking.getId());
@@ -180,6 +182,7 @@ public class VNPayServiceImpl implements VNPayService {
                 result.put("bookingCode", bookingCode);
             } else {
                 booking.setStatus(BookingStatus.CANCELLED);
+                booking.setPaymentUrl(null);
                 bookingRepository.save(booking);
                 unlockRooms(booking);
 

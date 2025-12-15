@@ -43,10 +43,14 @@ public class Booking {
     @Column(precision = 10, scale = 2)
     private BigDecimal amount;
 
-    @Column(name = "decline_reason")
+    @Column(name = "decline_reason", columnDefinition = "TEXT")
     private String declineReason;
 
+    @Column(columnDefinition = "TEXT")
     private String note;
+
+    @Column(name = "payment_url", columnDefinition = "TEXT")
+    private String paymentUrl;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
