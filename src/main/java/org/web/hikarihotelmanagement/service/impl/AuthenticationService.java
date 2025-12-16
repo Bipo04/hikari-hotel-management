@@ -107,7 +107,7 @@ public class AuthenticationService {
                 variables
             );
             log.info("Gửi email OTP thành công tới: {}", email);
-        } catch (MessagingException e) {
+        } catch (Exception e) {
             log.error("Gửi email OTP thất bại tới: {}. Lỗi: {}", email, e.getMessage());
             throw new ApiException("Không thể gửi email OTP: " + e.getMessage());
         }
