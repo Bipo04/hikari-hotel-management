@@ -9,9 +9,10 @@ import org.springframework.web.bind.annotation.*;
 import org.web.hikarihotelmanagement.dto.request.AvailableRoomTypeRequest;
 import org.web.hikarihotelmanagement.dto.response.AvailableRoomTypeResponse;
 import org.web.hikarihotelmanagement.dto.response.RoomTypeDetailResponse;
+import org.web.hikarihotelmanagement.dto.response.RoomTypeImageResponse;
 import org.web.hikarihotelmanagement.dto.response.RoomTypeResponse;
-import org.web.hikarihotelmanagement.entity.RoomType;
 import org.web.hikarihotelmanagement.mapper.RoomTypeMapper;
+import org.web.hikarihotelmanagement.service.RoomTypeImageService;
 import org.web.hikarihotelmanagement.service.RoomTypeService;
 
 import java.time.LocalDate;
@@ -25,6 +26,7 @@ public class PublicRoomTypeController {
 
     private final RoomTypeService roomTypeService;
     private final RoomTypeMapper roomTypeMapper;
+    private final RoomTypeImageService roomTypeImageService;
 
     // Lấy danh sách tất cả loại phòng (PUBLIC)
     @GetMapping
@@ -70,5 +72,12 @@ public class PublicRoomTypeController {
                         checkOutDate
                 );
         return ResponseEntity.ok(roomTypeDetail);
+    }
+
+    @GetMapping("/{roomTypeId}/images")
+    @Operation(summary = "Lấy tất cả các ảnh của 1 loại phòng")
+    public ResponseEntity<List<RoomTypeImageResponse>> getImages(@PathVariable Long roomTypeId) {
+        List<RoomTypeImageResponse> images = roomTypeImageService.getImagesByRoomType(roomTypeId);
+        return ResponseEntity.ok(images);
     }
 }

@@ -12,5 +12,8 @@ public record AuthenticationResponse(
         String email,
 
         @Schema(description = "Tên đầy đủ", example = "Lê Đảng")
-        String fullName
+        String fullName,
+
+        @Schema(description = "Vai trò")
+        String role
 ) {}
