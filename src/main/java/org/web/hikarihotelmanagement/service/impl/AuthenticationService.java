@@ -91,7 +91,9 @@ public class AuthenticationService {
         String token = jwtService.generateToken(user);
         log.info("Đăng nhập thành công cho email: {}", request.email());
 
-        return new AuthenticationResponse(token, user.getEmail(), user.getName());
+        String role = user.getRole().toString();
+
+        return new AuthenticationResponse(token, user.getEmail(), user.getName(), role);
     }
 
     private void sendOtpEmail(String email, String otp) {
