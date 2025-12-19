@@ -62,4 +62,6 @@ jobs:
             # Reload systemd và restart service
             sudo systemctl daemon-reload
             sudo systemctl restart myapp.service
+            sudo systemctl restart myapp1.service
             sudo systemctl status myapp.service --no-pager
+            sudo systemctl status myapp1.service --no-pager
