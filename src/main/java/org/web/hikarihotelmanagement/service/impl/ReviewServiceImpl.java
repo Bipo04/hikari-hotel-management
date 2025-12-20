@@ -8,7 +8,6 @@ import org.web.hikarihotelmanagement.dto.request.CreateReviewRequest;
 import org.web.hikarihotelmanagement.dto.response.ReviewResponse;
 import org.web.hikarihotelmanagement.entity.Booking;
 import org.web.hikarihotelmanagement.entity.Review;
-import org.web.hikarihotelmanagement.entity.RoomType;
 import org.web.hikarihotelmanagement.entity.User;
 import org.web.hikarihotelmanagement.enums.RequestStatus;
 import org.web.hikarihotelmanagement.exception.ApiException;
@@ -89,7 +88,7 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     public List<ReviewResponse> getReviewsByRoomType(Long roomTypeId) {
         // Kiểm tra room type có tồn tại không
-        RoomType roomType = roomTypeRepository.findById(roomTypeId)
+        roomTypeRepository.findById(roomTypeId)
                 .orElseThrow(() -> new ApiException("Không tìm thấy loại phòng"));
 
         List<Review> reviews = reviewRepository.findByRoomTypeId(roomTypeId);

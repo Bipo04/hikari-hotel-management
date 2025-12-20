@@ -8,7 +8,6 @@ import org.web.hikarihotelmanagement.entity.RoomType;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 public interface RoomTypeService {
     RoomType createRoomType(RoomType roomType);

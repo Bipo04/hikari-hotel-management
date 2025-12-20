@@ -1,12 +1,12 @@
 package org.web.hikarihotelmanagement.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
-import org.web.hikarihotelmanagement.dto.request.AmenityRequest;
-import org.web.hikarihotelmanagement.dto.response.AmenityResponse;
-import org.web.hikarihotelmanagement.service.AmenityService;
 
 import java.util.List;
+
+import org.springframework.web.bind.annotation.*;
+import org.web.hikarihotelmanagement.dto.response.AmenityResponse;
+import org.web.hikarihotelmanagement.service.AmenityService;
 
 @RestController
 @RequestMapping("/api/public/amenities")

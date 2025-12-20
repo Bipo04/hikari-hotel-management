@@ -30,13 +30,11 @@ import java.util.List;
 public class ScheduledTasks {
 
     private final UserService userService;
-    private final CustomerTierService customerTierService;
     private final BookingRepository bookingRepository;
     private final RequestRepository requestRepository;
     private final RoomAvailabilityRepository roomAvailabilityRepository;
     private final RoomAvailabilityRequestRepository roomAvailabilityRequestRepository;
     private final RoomRepository roomRepository;
-    private final RoomService roomService;
 
     @Scheduled(cron = "0 0 0 * * ?")
     public void deleteUnverifiedUsersTask() {

@@ -10,7 +10,7 @@ import org.web.hikarihotelmanagement.entity.CustomerTier;
 @Mapper(componentModel = "spring")
 public interface CustomerTierMapper {
     
-    @Mapping(target = "userCount", expression = "java(tier.getUsers() != null ? (long) tier.getUsers().size() : 0L)")
+    @Mapping(target = "userCount", expression = "java(tier.getUsers() != null ? tier.getUsers().stream().filter(u -> u.getRole() == org.web.hikarihotelmanagement.enums.Role.USER && Boolean.TRUE.equals(u.getStatus()) && Boolean.TRUE.equals(u.getIsVerified())).count() : 0L)")
     CustomerTierDetailResponse toDetailResponse(CustomerTier tier);
     
     @Mapping(target = "id", ignore = true)
