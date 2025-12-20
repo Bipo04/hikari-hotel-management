@@ -4,7 +4,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.web.hikarihotelmanagement.dto.response.CustomerTierStatisticItem;
-import org.web.hikarihotelmanagement.dto.response.DashboardResponse;
 import org.web.hikarihotelmanagement.entity.CustomerTier;
 import org.web.hikarihotelmanagement.enums.Role;
 
@@ -39,7 +38,7 @@ public interface CustomerTierRepository extends JpaRepository<CustomerTier, Long
         )
         FROM CustomerTier ct
         LEFT JOIN ct.users u
-            ON u.role = :role AND u.status = true
+            ON u.role = :role AND u.status = true AND u.isVerified = true
         WHERE ct.active = true
         GROUP BY ct.code, ct.tierOrder
         ORDER BY ct.tierOrder

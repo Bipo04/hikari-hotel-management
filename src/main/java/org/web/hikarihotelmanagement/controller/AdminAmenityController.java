@@ -6,8 +6,6 @@ import org.web.hikarihotelmanagement.dto.request.AmenityRequest;
 import org.web.hikarihotelmanagement.dto.response.AmenityResponse;
 import org.web.hikarihotelmanagement.service.AmenityService;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/admin/amenities")
 @RequiredArgsConstructor
