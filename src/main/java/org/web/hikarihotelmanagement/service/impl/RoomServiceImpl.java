@@ -161,53 +161,38 @@ public class RoomServiceImpl implements RoomService {
             throw new IllegalArgumentException("from không được sau to");
         }
 
-        Room room = roomRepository.findById(roomId)
+        roomRepository.findById(roomId)
                 .orElseThrow(() -> new ApiException("Không tìm thấy Room với id = " + roomId));
 
-        BigDecimal defaultPrice = (room.getRoomType() != null ? room.getRoomType().getPrice() : null);
-
-        // availability records
         List<RoomAvailability> records = roomAvailabilityRepository.findByRoomAndDateRange(roomId, from, to);
 
-        Map<LocalDate, RoomAvailability> availabilityMap = new HashMap<>();
-        for (RoomAvailability ra : records) {
-            availabilityMap.put(ra.getAvailableDate(), ra);
-        }
-
-        // booking info cho ngày unavailable
         List<RoomAvailabilityBookingInfoDto> bookingInfos =
                 roomAvailabilityRepository.findBookingInfoForUnavailableDates(roomId, from, to);
 
         Map<LocalDate, RoomAvailabilityBookingInfoDto> bookingMap = new HashMap<>();
         for (RoomAvailabilityBookingInfoDto info : bookingInfos) {
-            // nếu trùng ngày, giữ cái đầu tiên (hoặc ghi đè tuỳ bạn)
             bookingMap.putIfAbsent(info.getDate(), info);
         }
 
-        List<RoomAvailabilityCalendarResponse> result = new ArrayList<>();
-        LocalDate d = from;
-
-        while (!d.isAfter(to)) {
-            RoomAvailability ra = availabilityMap.get(d);
-
-            Boolean isAvailable = (ra != null ? ra.getIsAvailable() : Boolean.TRUE);
-            BigDecimal price = (ra != null && ra.getPrice() != null) ? ra.getPrice() : defaultPrice;
-
+        return records.stream().map(ra -> {
             Long bookingId = null;
             String bookingCode = null;
 
-            if (Boolean.FALSE.equals(isAvailable)) {
-                RoomAvailabilityBookingInfoDto info = bookingMap.get(d);
+            if (Boolean.FALSE.equals(ra.getIsAvailable())) {
+                RoomAvailabilityBookingInfoDto info = bookingMap.get(ra.getAvailableDate());
                 if (info != null) {
                     bookingId = info.getBookingId();
                     bookingCode = info.getBookingCode();
                 }
             }
 
-            result.add(new RoomAvailabilityCalendarResponse(d, isAvailable, price, bookingId, bookingCode));
-            d = d.plusDays(1);
-        }
-
-        return result;
+            return new RoomAvailabilityCalendarResponse(
+                    ra.getAvailableDate(),
+                    ra.getIsAvailable(),
+                    ra.getPrice(),
+                    bookingId,
+                    bookingCode
+            );
+        }).toList();
     }
 }
