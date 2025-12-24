@@ -41,6 +41,18 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<UserResponse> getAllUsersWithoutPaging() {
+        log.info("Lấy danh sách tất cả người dùng không phân trang");
+        
+        List<User> users = userRepository.findAll();
+        
+        return users.stream()
+                .map(userMapper::toUserResponse)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public UserResponse getUserById(Long id) {
         log.info("Lấy thông tin người dùng theo ID: {}", id);
 

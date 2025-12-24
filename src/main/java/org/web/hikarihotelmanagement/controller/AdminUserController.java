@@ -15,6 +15,7 @@ import org.web.hikarihotelmanagement.dto.response.UserResponse;
 import org.web.hikarihotelmanagement.service.UserService;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -55,6 +56,16 @@ public class AdminUserController {
         );
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/all")
+    @Operation(
+            summary = "Lấy tất cả người dùng (không phân trang)",
+            description = "Lấy danh sách tất cả người dùng mà không phân trang"
+    )
+    public ResponseEntity<List<UserResponse>> getAllUsersWithoutPaging() {
+        List<UserResponse> users = userService.getAllUsersWithoutPaging();
+        return ResponseEntity.ok(users);
     }
 
     @GetMapping("/{id}")
