@@ -377,6 +377,18 @@ public class BookingServiceImpl implements BookingService {
             throw new ApiException("Chỉ có thể check-in khi request đã thanh toán");
         }
         
+        // Kiểm tra ngày check-in phải nằm trong khoảng thời gian đặt phòng
+        LocalDate today = LocalDate.now();
+        LocalDate bookingCheckInDate = requestEntity.getCheckIn().toLocalDate();
+        LocalDate bookingCheckOutDate = requestEntity.getCheckOut().toLocalDate();
+        
+        if (today.isBefore(bookingCheckInDate)) {
+            throw new ApiException("Chưa đến ngày check-in. Ngày check-in là " + bookingCheckInDate);
+        }
+        if (today.isAfter(bookingCheckOutDate) || today.isEqual(bookingCheckOutDate)) {
+            throw new ApiException("Đã quá thời gian đặt phòng. Ngày check-out là " + bookingCheckOutDate);
+        }
+        
         // Validate thông tin giấy tờ của khách
         for (CheckInRequest.GuestInfo guestInfo : request.getGuests()) {
             validateIdentityNumber(guestInfo);
