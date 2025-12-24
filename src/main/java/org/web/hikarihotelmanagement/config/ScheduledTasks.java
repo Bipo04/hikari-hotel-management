@@ -16,8 +16,6 @@ import org.web.hikarihotelmanagement.repository.RequestRepository;
 import org.web.hikarihotelmanagement.repository.RoomAvailabilityRepository;
 import org.web.hikarihotelmanagement.repository.RoomAvailabilityRequestRepository;
 import org.web.hikarihotelmanagement.repository.RoomRepository;
-import org.web.hikarihotelmanagement.service.CustomerTierService;
-import org.web.hikarihotelmanagement.service.RoomService;
 import org.web.hikarihotelmanagement.service.UserService;
 
 import java.time.LocalDate;
@@ -42,7 +40,7 @@ public class ScheduledTasks {
         userService.deleteUnverifiedUsers();
     }
     
-    @Scheduled(fixedRate = 300000)
+    @Scheduled(fixedRate = 60000)
     @Transactional
     public void cancelExpiredBookings() {
         LocalDateTime expirationTime = LocalDateTime.now().minusMinutes(15);
