@@ -15,8 +15,11 @@ public record RegisterRequest(
         String email,
 
         @Schema(description = "Mật khẩu của user", example = "P@ssw0rd!")
-        @NotBlank(message = "Password không được để trống")
-        @Size(min = 6, message = "Password phải ít nhất 6 ký tự")
+        @Size(min = 6, message = "Mật khẩu phải có ít nhất 8 ký tự")
+        @Pattern(
+                regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$",
+                message = "Mật khẩu phải bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt"
+        )
         String password,
 
         @Schema(description = "Họ và tên đầy đủ", example = "Nguyễn Văn A")
@@ -30,6 +33,7 @@ public record RegisterRequest(
 
         @Schema(description = "Ngày sinh", example = "2000-01-01")
         @NotNull(message = "Ngày sinh không được để trống")
+        @Past(message = "Ngày sinh phải là ngày trong quá khứ")
         @JsonFormat(pattern = "yyyy-MM-dd")
         Date birthDate
 ) {}

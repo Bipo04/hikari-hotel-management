@@ -35,7 +35,7 @@ public class Guest {
     @Column(name = "identity_type")
     private IdentityType identityType;
 
-    @Column(name = "identity_number", unique = true)
+    @Column(name = "identity_number")
     private String identityNumber;
 
     @Column(name = "identity_issued_date")

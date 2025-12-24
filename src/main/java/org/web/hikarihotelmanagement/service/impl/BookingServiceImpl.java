@@ -377,6 +377,11 @@ public class BookingServiceImpl implements BookingService {
             throw new ApiException("Chỉ có thể check-in khi request đã thanh toán");
         }
         
+        // Validate thông tin giấy tờ của khách
+        for (CheckInRequest.GuestInfo guestInfo : request.getGuests()) {
+            validateIdentityNumber(guestInfo);
+        }
+        
         // Cập nhật trạng thái
         requestEntity.setStatus(RequestStatus.CHECKED_IN);
         requestRepository.save(requestEntity);
@@ -395,6 +400,36 @@ public class BookingServiceImpl implements BookingService {
         }
         
         log.info("Đã check-in request {} với {} khách", requestEntity.getId(), request.getGuests().size());
+    }
+    
+    private void validateIdentityNumber(CheckInRequest.GuestInfo guestInfo) {
+        String identityNumber = guestInfo.getIdentityNumber();
+        if (identityNumber == null) return;
+        
+        identityNumber = identityNumber.trim();
+        
+        switch (guestInfo.getIdentityType()) {
+            case CCCD -> {
+                if (!identityNumber.matches("^\\d{12}$")) {
+                    throw new ApiException("CCCD phải có đúng 12 chữ số");
+                }
+            }
+            case CMND -> {
+                if (!identityNumber.matches("^\\d{9}$|^\\d{12}$")) {
+                    throw new ApiException("CMND phải có 9 hoặc 12 chữ số");
+                }
+            }
+            case PASSPORT -> {
+                if (!identityNumber.matches("^[A-Z]\\d{7,8}$")) {
+                    throw new ApiException("Hộ chiếu phải có 1 chữ cái viết hoa và 7-8 chữ số (VD: B12345678)");
+                }
+            }
+            case DRIVER_LICENSE -> {
+                if (!identityNumber.matches("^\\d{12}$")) {
+                    throw new ApiException("Bằng lái xe phải có đúng 12 chữ số");
+                }
+            }
+        }
     }
     
     @Override

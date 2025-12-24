@@ -14,7 +14,7 @@ public record ChangePasswordRequest(
         @Schema(description = "Mật khẩu mới (ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt)", 
                 example = "NewPassword123!")
         @NotBlank(message = "Mật khẩu mới không được để trống")
-        @Size(min = 8, message = "Mật khẩu phải có ít nhất 8 ký tự")
+        @Size(min = 6, message = "Mật khẩu phải có ít nhất 8 ký tự")
         @Pattern(
                 regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$",
                 message = "Mật khẩu phải bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt"

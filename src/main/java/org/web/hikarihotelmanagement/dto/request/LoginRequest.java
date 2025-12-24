@@ -3,6 +3,7 @@ package org.web.hikarihotelmanagement.dto.request;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 @Schema(description = "Thông tin đăng nhập của user")
@@ -14,7 +15,6 @@ public record LoginRequest(
         String email,
 
         @Schema(description = "Mật khẩu của user", example = "ledang")
-        @NotBlank(message = "Password không được để trống")
-        @Size(min = 6, message = "Password phải ít nhất 6 ký tự")
+        @Size(min = 6, message = "Mật khẩu phải có ít nhất 8 ký tự")
         String password
 ) {}

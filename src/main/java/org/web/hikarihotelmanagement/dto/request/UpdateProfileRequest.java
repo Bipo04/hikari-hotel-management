@@ -1,6 +1,7 @@
 package org.web.hikarihotelmanagement.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
@@ -17,5 +18,6 @@ public record UpdateProfileRequest(
         String phone,
 
         @Schema(description = "Ngày sinh")
+        @Past(message = "Ngày sinh phải là ngày trong quá khứ")
         Date birthDate
 ) {}
