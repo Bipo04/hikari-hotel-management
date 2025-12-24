@@ -308,6 +308,17 @@ public class BookingServiceImpl implements BookingService {
         if (hasCheckedInOrOut) {
             throw new ApiException("Không thể hủy đơn đặt phòng khi đã có phòng check-in hoặc check-out");
         }
+        
+        // Kiểm tra chỉ cho phép hủy trước ngày check-in sớm nhất
+        LocalDate today = LocalDate.now();
+        LocalDate earliestCheckIn = booking.getRequests().stream()
+                .map(req -> req.getCheckIn().toLocalDate())
+                .min(LocalDate::compareTo)
+                .orElse(today);
+        
+        if (!today.isBefore(earliestCheckIn)) {
+            throw new ApiException("Chỉ có thể hủy đơn trước ngày check-in (" + earliestCheckIn + ")");
+        }
 
         // Nếu đã thanh toán thành công (PAYMENT_COMPLETED), trừ lại tiền và số đơn của user
         if (booking.getStatus() == BookingStatus.PAYMENT_COMPLETED) {
